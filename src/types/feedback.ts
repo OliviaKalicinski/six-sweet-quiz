@@ -1,4 +1,7 @@
 export interface FeedbackAnswers {
+  // Question 0: Name
+  customerName: string;
+  
   // Question 1: Context
   petType: string;
   petTypeOther?: string;
@@ -32,6 +35,7 @@ export interface FeedbackAnswers {
 }
 
 export const initialFeedbackAnswers: FeedbackAnswers = {
+  customerName: "",
   petType: "",
   usageTime: "",
   npsScore: null,

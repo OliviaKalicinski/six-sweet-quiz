@@ -12,8 +12,9 @@ import { QuestionWrapper } from "./QuestionWrapper";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import logo from "@/assets/logo.png";
+import { Input } from "@/components/ui/input";
 
-const TOTAL_QUESTIONS = 8;
+const TOTAL_QUESTIONS = 9;
 
 export const FeedbackSurvey = () => {
   const navigate = useNavigate();
@@ -25,25 +26,27 @@ export const FeedbackSurvey = () => {
 
   const canProceed = (): boolean => {
     switch (currentQuestion) {
-      case 0: // Context
+      case 0: // Name
+        return answers.customerName.trim() !== "";
+      case 1: // Context
         return answers.petType !== "" && answers.usageTime !== "" && 
                (answers.petType !== "other" || (answers.petTypeOther?.trim() || "") !== "");
-      case 1: // NPS
+      case 2: // NPS
         return answers.npsScore !== null;
-      case 2: // Expectations
+      case 3: // Expectations
         return answers.expectations !== "";
-      case 3: // Motivation
+      case 4: // Motivation
         return answers.motivations.length > 0 &&
                (!answers.motivations.includes("other") || (answers.motivationOther?.trim() || "") !== "");
-      case 4: // Strengths/Weaknesses
+      case 5: // Strengths/Weaknesses
         return answers.likedMost.trim() !== "" && answers.wouldChange.trim() !== "";
-      case 5: // Acceptance
+      case 6: // Acceptance
         if (answers.petAcceptance === "") return false;
         if (answers.petAcceptance === "rejected" && !answers.rejectionAction) return false;
         return true;
-      case 6: // Repurchase
+      case 7: // Repurchase
         return answers.wouldRepurchase !== "";
-      case 7: // Ideal Product (optional)
+      case 8: // Ideal Product (optional)
         return true;
       default:
         return false;
@@ -68,6 +71,7 @@ export const FeedbackSurvey = () => {
     setIsSubmitting(true);
     try {
       const { error } = await supabase.from("feedback_responses").insert({
+        customer_name: answers.customerName,
         pet_type: answers.petType,
         pet_type_other: answers.petTypeOther || null,
         usage_time: answers.usageTime,
@@ -138,6 +142,19 @@ export const FeedbackSurvey = () => {
         
         <div className="mt-8">
           {currentQuestion === 0 && (
+            <QuestionWrapper title="Qual é o seu nome?">
+              <Input
+                type="text"
+                value={answers.customerName}
+                onChange={(e) => setAnswers({ ...answers, customerName: e.target.value })}
+                placeholder="Digite seu nome"
+                className="text-lg py-6 text-center font-special"
+                autoFocus
+              />
+            </QuestionWrapper>
+          )}
+
+          {currentQuestion === 1 && (
             <div className="space-y-8">
               <QuestionWrapper title="Para qual pet você comprou?">
                 <RadioOptions
@@ -169,7 +186,7 @@ export const FeedbackSurvey = () => {
             </div>
           )}
 
-          {currentQuestion === 1 && (
+          {currentQuestion === 2 && (
             <QuestionWrapper 
               title="Numa escala de 0 a 10, o quanto você recomendaria Comida de Dragão para outro tutor?"
             >
@@ -180,7 +197,7 @@ export const FeedbackSurvey = () => {
             </QuestionWrapper>
           )}
 
-          {currentQuestion === 2 && (
+          {currentQuestion === 3 && (
             <div className="space-y-8">
               <QuestionWrapper title="O produto atendeu às suas expectativas?">
                 <RadioOptions
@@ -209,7 +226,7 @@ export const FeedbackSurvey = () => {
             </div>
           )}
 
-          {currentQuestion === 3 && (
+          {currentQuestion === 4 && (
             <QuestionWrapper title="O que te motivou a experimentar proteína de inseto?">
               <CheckboxOptions
                 options={[
@@ -230,7 +247,7 @@ export const FeedbackSurvey = () => {
             </QuestionWrapper>
           )}
 
-          {currentQuestion === 4 && (
+          {currentQuestion === 5 && (
             <div className="space-y-8">
               <QuestionWrapper title="O que você MAIS GOSTOU no produto?">
                 <TextAreaWithCounter
@@ -252,7 +269,7 @@ export const FeedbackSurvey = () => {
             </div>
           )}
 
-          {currentQuestion === 5 && (
+          {currentQuestion === 6 && (
             <div className="space-y-8">
               <QuestionWrapper title="Como foi a aceitação do seu pet?">
                 <RadioOptions
@@ -285,7 +302,7 @@ export const FeedbackSurvey = () => {
             </div>
           )}
 
-          {currentQuestion === 6 && (
+          {currentQuestion === 7 && (
             <div className="space-y-8">
               <QuestionWrapper title="Você compraria novamente?">
                 <RadioOptions
@@ -313,7 +330,7 @@ export const FeedbackSurvey = () => {
             </div>
           )}
 
-          {currentQuestion === 7 && (
+          {currentQuestion === 8 && (
             <QuestionWrapper 
               title="Que produto você gostaria que a gente criasse?"
               subtitle="Exemplos: ração completa, sachê, outro sabor, outro formato..."
