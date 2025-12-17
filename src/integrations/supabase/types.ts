@@ -17,6 +17,7 @@ export type Database = {
       feedback_responses: {
         Row: {
           created_at: string
+          customer_name: string
           expectations: string
           expectations_reason: string | null
           id: string
@@ -36,6 +37,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          customer_name?: string
           expectations: string
           expectations_reason?: string | null
           id?: string
@@ -55,6 +57,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          customer_name?: string
           expectations?: string
           expectations_reason?: string | null
           id?: string

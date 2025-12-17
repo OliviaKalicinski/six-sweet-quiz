@@ -1,9 +1,23 @@
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import logo from "@/assets/logo.png";
 
 const Results = () => {
   const couponCode = "FALOUEDISSE";
+  const [customerName, setCustomerName] = useState("");
+
+  useEffect(() => {
+    const stored = localStorage.getItem("feedbackAnswers");
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        setCustomerName(parsed.customerName || "");
+      } catch (e) {
+        console.error("Error parsing feedback answers:", e);
+      }
+    }
+  }, []);
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
@@ -16,8 +30,8 @@ const Results = () => {
             <div className="text-7xl md:text-8xl mb-4">
               🐉
             </div>
-            <h1 className="text-2xl md:text-3xl font-display font-bold text-question mb-4">
-              O Dragão agradece!
+            <h1 className="text-2xl md:text-3xl font-special font-bold text-question mb-4">
+              {customerName ? `${customerName}, o Dragão agradece!` : "O Dragão agradece!"}
             </h1>
             <p className="text-base md:text-lg font-special text-foreground leading-relaxed mb-6">
               Sua opinião vai guiar os próximos passos da revolução.
