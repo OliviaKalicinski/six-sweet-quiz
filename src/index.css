@@ -1,0 +1,113 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    --background: 82 100% 95%;
+    --foreground: 180 30% 20%;
+
+    --card: 82 100% 95%;
+    --card-foreground: 180 30% 20%;
+
+    --popover: 82 100% 95%;
+    --popover-foreground: 180 30% 20%;
+
+    --primary: 340 65% 70%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 180 30% 25%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 40 15% 88%;
+    --muted-foreground: 180 15% 45%;
+
+    --accent: 340 65% 70%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 40 20% 85%;
+    --input: 0 0% 100%;
+    --ring: 340 65% 70%;
+
+    --radius: 1rem;
+    
+    --question: 340 75% 55%;
+    --progress-bg: 40 20% 88%;
+    --progress-fill: 180 30% 25%;
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 180 30% 15%;
+    --foreground: 40 25% 95%;
+
+    --card: 180 30% 15%;
+    --card-foreground: 40 25% 95%;
+
+    --popover: 180 30% 15%;
+    --popover-foreground: 40 25% 95%;
+
+    --primary: 340 65% 70%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 180 30% 25%;
+    --secondary-foreground: 40 25% 95%;
+
+    --muted: 180 20% 20%;
+    --muted-foreground: 180 15% 60%;
+
+    --accent: 340 65% 70%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 40 25% 95%;
+
+    --border: 180 20% 25%;
+    --input: 180 25% 20%;
+    --ring: 340 65% 70%;
+    --sidebar-background: 180 30% 15%;
+    --sidebar-foreground: 40 25% 95%;
+    --sidebar-primary: 340 65% 70%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 180 20% 20%;
+    --sidebar-accent-foreground: 40 25% 95%;
+    --sidebar-border: 180 20% 25%;
+    --sidebar-ring: 340 65% 70%;
+    
+    --question: 340 75% 65%;
+    --progress-bg: 180 20% 25%;
+    --progress-fill: 340 65% 70%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
