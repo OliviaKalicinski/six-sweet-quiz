@@ -109,14 +109,14 @@ export const FeedbackSurvey = () => {
             <div className="mb-6 flex justify-center">
               <img src={logo} alt="Comida de Dragão" className="w-64 md:w-80 h-auto" />
             </div>
-            <h1 className="text-3xl md:text-5xl font-display font-bold text-question mb-6">
+            <h1 className="text-3xl md:text-5xl font-special font-bold text-question mb-6">
               🐉 O Dragão quer ouvir você!
             </h1>
             <p className="text-lg md:text-xl font-special text-muted-foreground mb-4">
               Sua experiência com nossos produtos ajuda a gente a criar produtos ainda melhores.
             </p>
             <p className="text-base md:text-lg font-special text-foreground mb-6">
-              São só 2 minutos. No final: cupom de <span className="font-bold text-primary">15% OFF</span> 💚
+              São só 2 minutos. No final você ganha um <span className="font-bold text-primary">cupom especial</span> 💚
             </p>
           </div>
           <Button
