@@ -1,7 +1,7 @@
-import { Quiz } from "@/components/Quiz";
+import { FeedbackSurvey } from "@/components/feedback/FeedbackSurvey";
 
 const Index = () => {
-  return <Quiz />;
+  return <FeedbackSurvey />;
 };
 
 export default Index;
