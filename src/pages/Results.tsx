@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import logo from "@/assets/logo.png";
 
 const Results = () => {
-  const couponCode = "DRAGAO15";
+  const couponCode = "FALOUEDISSE";
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
@@ -32,13 +32,13 @@ const Results = () => {
               {couponCode}
             </div>
             <p className="text-sm font-special text-muted-foreground">
-              Válido por 30 dias em todo o site
+              Um uso por cliente
             </p>
           </div>
 
           <div className="flex flex-col gap-4 justify-center">
             <Button
-              onClick={() => window.open("https://comidadedragao.com.br", "_blank")}
+              onClick={() => window.open("https://www.comidadedragao.com.br/collections/produtos", "_blank")}
               size="lg"
               className="text-base md:text-lg font-special px-8 py-6 rounded-full w-full"
             >

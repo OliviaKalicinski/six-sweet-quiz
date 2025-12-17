@@ -10,7 +10,7 @@ export const QuestionWrapper = ({ title, subtitle, children }: QuestionWrapperPr
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
       <div className="text-center space-y-2">
-        <h2 className="text-xl md:text-2xl font-display font-bold text-question">
+        <h2 className="text-xl md:text-2xl font-special font-bold text-question">
           {title}
         </h2>
         {subtitle && (
