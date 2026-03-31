@@ -1,48 +1,30 @@
-export interface FeedbackAnswers {
-  // Question 0: Name
+export type YesNo = 'yes' | 'no';
+
+export interface SurveyAnswers {
+  // Step 0: Name
   customerName: string;
-  
-  // Question 1: Context
-  petType: string;
-  petTypeOther?: string;
-  usageTime: string;
-  
-  // Question 2: NPS
-  npsScore: number | null;
-  
-  // Question 3: Expectations
-  expectations: string;
-  expectationsReason?: string;
-  
-  // Question 4: Motivation (max 2)
-  motivations: string[];
-  motivationOther?: string;
-  
-  // Question 5: Strengths and Weaknesses
-  likedMost: string;
-  wouldChange: string;
-  
-  // Question 6: Acceptance
-  petAcceptance: string;
-  rejectionAction?: string;
-  
-  // Question 7: Repurchase
-  wouldRepurchase: string;
-  noRepurchaseReason?: string;
-  
-  // Question 8: Ideal Product
-  idealProduct?: string;
+
+  // Step 1: Pet loved it?
+  petLoved: YesNo | null;
+
+  // Step 2: Met expectations?
+  metExpectations: YesNo | null;
+
+  // Step 3: Would recommend?
+  wouldRecommend: YesNo | null;
+
+  // Step 4: Would repurchase?
+  wouldRepurchase: YesNo | null;
+
+  // Step 5: Open feedback (optional)
+  improvement?: string;
 }
 
-export const initialFeedbackAnswers: FeedbackAnswers = {
-  customerName: "",
-  petType: "",
-  usageTime: "",
-  npsScore: null,
-  expectations: "",
-  motivations: [],
-  likedMost: "",
-  wouldChange: "",
-  petAcceptance: "",
-  wouldRepurchase: "",
+export const initialSurveyAnswers: SurveyAnswers = {
+  customerName: '',
+  petLoved: null,
+  metExpectations: null,
+  wouldRecommend: null,
+  wouldRepurchase: null,
+  improvement: '',
 };
