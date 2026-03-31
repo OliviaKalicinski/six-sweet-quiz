@@ -28,50 +28,140 @@ const ENTRY_STEPS: Record<ChurnStatus, string> = {
   lead:     "lead_q1",
 };
 
-// ─── SURVEY STEPS ──────────────────────────────────────────────────────────────
+// ─── ALL SURVEY STEPS ──────────────────────────────────────────────────────────
 
 const STEPS: Record<string, SurveyStep> = {
 
-  // ── ACTIVE ────────────────────────────────────────────────────────────────
+  // ════════════════════════════════════════════════════════════════════════════
+  // FLUXO ACTIVE — até 5 perguntas com profundidade real
+  // ════════════════════════════════════════════════════════════════════════════
+
+  // Q1 ── Pet amou?
   active_q1: {
     id: "active_q1", type: "yesno",
     dragonVoice: "O Dragão viu tudo. Mas quer ouvir de você.",
     question: "SEU PET AMOU A COMIDA DE DRAGÃO?",
-    onYes: "active_q2_sim", onNo: "active_q2_nao",
+    onYes: "active_q2",
+    onNo:  "active_q2_pet_nao",
   },
-  active_q2_sim: {
-    id: "active_q2_sim", type: "yesno",
+
+  // Q2 ── (SIM no Q1) Produto foi o que esperava?
+  active_q2: {
+    id: "active_q2", type: "yesno",
     dragonVoice: "Sem filtro — o Dragão só quer a verdade.",
     question: "O PRODUTO FOI O QUE VOCÊ ESPERAVA?",
-    onYes: "active_q3", onNo: "active_q2_nao_exp",
+    onYes: "active_q3",       // dinâmico por segmento
+    onNo:  "active_q2_prod_nao",
   },
-  active_q2_nao_exp: {
-    id: "active_q2_nao_exp", type: "text",
-    dragonVoice: "Opcional — mas vale muito. O Dragão lê tudo.",
-    question: "TEM ALGO QUE PODERIA TER SIDO MELHOR?",
-    textPlaceholder: "Sua opinião ajuda a gente a melhorar...",
+
+  // Q2 ── (NÃO no Q1) Pet não aceitou — tentou de jeitos diferentes?
+  active_q2_pet_nao: {
+    id: "active_q2_pet_nao", type: "yesno",
+    dragonVoice: "Antes de qualquer coisa — o Dragão precisa entender.",
+    question: "VOCÊ TENTOU OFERECER DE JEITOS DIFERENTES?",
+    onYes: "active_q3_pet_tentou",
+    onNo:  "end_how",
+  },
+
+  // Q3 ── (pet tentou) Como tentou? → text
+  active_q3_pet_tentou: {
+    id: "active_q3_pet_tentou", type: "text",
+    dragonVoice: "Isso nos ajuda muito. O Dragão vai levar isso a sério.",
+    question: "COMO VOCÊ TENTOU OFERECER?",
+    textPlaceholder: "Descreve o que aconteceu — quantidade, mistura, horário...",
+    onYes: "end_dica",
+  },
+
+  // Q2 ── (NÃO no Q2) Produto não correspondeu → texto
+  active_q2_prod_nao: {
+    id: "active_q2_prod_nao", type: "text",
+    dragonVoice: "O Dragão precisa ouvir isso. Sem julgamento.",
+    question: "O QUE PODERIA TER SIDO MELHOR?",
+    textPlaceholder: "Fala o que você esperava e o que veio...",
     onYes: "end_mel",
   },
+
+  // Q3 ── (SIM no Q2) por segmento — dinâmico
+  // Resolvido em runtime por resolveNextStep()
+
+  // ── Q3 → Compraria? (primeira / recorrente) ──────────────────────────────
+
   active_q3_nova: {
     id: "active_q3_nova", type: "yesno",
     dragonVoice: "Essa é a mais importante. O Dragão precisa saber.",
     question: "VOCÊ COMPRARIA DE NOVO?",
-    onYes: "end_pos", onNo: "end_inc",
+    onYes: "active_q4_compraria_sim",
+    onNo:  "active_q4_compraria_nao",
   },
+
+  // Q4 ── (SIM no compraria) Conhece todos os produtos?
+  active_q4_compraria_sim: {
+    id: "active_q4_compraria_sim", type: "yesno",
+    dragonVoice: "Ótimo! O Dragão tem mais pra mostrar.",
+    question: "VOCÊ CONHECE TODOS OS NOSSOS PRODUTOS?",
+    onYes: "end_pos",
+    onNo:  "end_descoberta",
+  },
+
+  // Q4 ── (NÃO no compraria) Por que não? Preço?
+  active_q4_compraria_nao: {
+    id: "active_q4_compraria_nao", type: "yesno",
+    dragonVoice: "Antes do cupom — o Dragão quer entender de verdade.",
+    question: "FOI PRINCIPALMENTE POR PREÇO?",
+    onYes: "end_price_compraria",
+    onNo:  "active_q5_produto",
+  },
+
+  // Q5 ── (NÃO no preço) O que precisaria mudar? → text
+  active_q5_produto: {
+    id: "active_q5_produto", type: "text",
+    dragonVoice: "Isso vale ouro pro Dragão. Fala com sinceridade.",
+    question: "O QUE PRECISARIA SER DIFERENTE PARA VOCÊ COMPRAR DE NOVO?",
+    textPlaceholder: "Produto, embalagem, sabor, formato, comunicação...",
+    onYes: "end_mel",
+  },
+
+  // ── Q3 → Indicaria? (fiel / vip) ─────────────────────────────────────────
+
   active_q3_fiel: {
     id: "active_q3_fiel", type: "yesno",
     dragonVoice: "A revolução cresce com a sua voz.",
     question: "VOCÊ JÁ INDICOU A COMIDA DE DRAGÃO PRA ALGUÉM?",
-    onYes: "end_pos", onNo: "end_inc",
-  },
-  active_q2_nao: {
-    id: "active_q2_nao", type: "yesno",
-    dragonVoice: "Calma — o Dragão tem um truque pra isso.",
-    question: "VOCÊ TENTOU OFERECER DE JEITOS DIFERENTES?",
-    onYes: "end_dica", onNo: "end_how",
+    onYes: "active_q4_indicou_sim",
+    onNo:  "active_q4_indicou_nao",
   },
 
-  // ── AT RISK ───────────────────────────────────────────────────────────────
+  // Q4 ── (SIM indicou) A pessoa comprou?
+  active_q4_indicou_sim: {
+    id: "active_q4_indicou_sim", type: "yesno",
+    dragonVoice: "A revolução se espalha. O Dragão viu tudo.",
+    question: "A PESSOA QUE VOCÊ INDICOU TAMBÉM COMPROU?",
+    onYes: "end_pos",
+    onNo:  "end_indica_compartilha",
+  },
+
+  // Q4 ── (NÃO indicou) Teve oportunidade?
+  active_q4_indicou_nao: {
+    id: "active_q4_indicou_nao", type: "yesno",
+    dragonVoice: "O Dragão quer entender — sem pressão.",
+    question: "VOCÊ JÁ TEVE OPORTUNIDADE DE INDICAR?",
+    onYes: "active_q5_indica",       // teve mas não indicou → precisa ouvir
+    onNo:  "end_indica_oport",       // não teve chance ainda → OK, cupom pra quando tiver
+  },
+
+  // Q5 ── (teve mas não indicou) O que impediu? → text
+  active_q5_indica: {
+    id: "active_q5_indica", type: "text",
+    dragonVoice: "Isso é importante. O Dragão precisa saber o que está faltando.",
+    question: "O QUE TE IMPEDIU DE INDICAR?",
+    textPlaceholder: "Insegurança com o produto? Não soube como apresentar? Outro motivo?",
+    onYes: "end_mel",
+  },
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // FLUXO AT RISK
+  // ════════════════════════════════════════════════════════════════════════════
+
   risk_q1: {
     id: "risk_q1", type: "yesno",
     dragonVoice: "O Dragão vê tudo — inclusive quando o pote acaba.",
@@ -97,7 +187,10 @@ const STEPS: Record<string, SurveyStep> = {
     onYes: "end_price_at", onNo: "end_other",
   },
 
-  // ── INACTIVE ──────────────────────────────────────────────────────────────
+  // ════════════════════════════════════════════════════════════════════════════
+  // FLUXO INACTIVE
+  // ════════════════════════════════════════════════════════════════════════════
+
   inactive_q1: {
     id: "inactive_q1", type: "yesno",
     dragonVoice: "O Dragão não deixa ninguém pra trás.",
@@ -123,7 +216,10 @@ const STEPS: Record<string, SurveyStep> = {
     onYes: "end_price_in", onNo: "end_text",
   },
 
-  // ── CHURNED ───────────────────────────────────────────────────────────────
+  // ════════════════════════════════════════════════════════════════════════════
+  // FLUXO CHURNED
+  // ════════════════════════════════════════════════════════════════════════════
+
   churned_q1: {
     id: "churned_q1", type: "yesno",
     dragonVoice: "O Dragão vê tudo — sem pressão, só curiosidade.",
@@ -132,7 +228,7 @@ const STEPS: Record<string, SurveyStep> = {
   },
   churned_q2_sim: {
     id: "churned_q2_sim", type: "yesno",
-    dragonVoice: "Boa! O Dragão ficou feliz em saber.",
+    dragonVoice: "O Dragão ficou feliz em saber.",
     question: "VOCÊ FICOU ESPERANDO PARA PEDIR MAIS?",
     onYes: "end_reab", onNo: "end_novid",
   },
@@ -149,7 +245,10 @@ const STEPS: Record<string, SurveyStep> = {
     onYes: "end_text_c", onNo: "end_ok",
   },
 
-  // ── LEAD ──────────────────────────────────────────────────────────────────
+  // ════════════════════════════════════════════════════════════════════════════
+  // FLUXO LEAD
+  // ════════════════════════════════════════════════════════════════════════════
+
   lead_q1: {
     id: "lead_q1", type: "yesno",
     dragonVoice: "O Dragão me pediu pra perguntar sem rodeios.",
@@ -176,29 +275,125 @@ const STEPS: Record<string, SurveyStep> = {
     onYes: "end_lead_novo", onNo: "end_lead_nao",
   },
 
-  // ── END STATES ────────────────────────────────────────────────────────────
-  end_pos:      { id: "end_pos",      type: "end", dragonVoice: "", question: "", endConfig: { message: "Que bom! O Dragão ficou feliz. Tmj! 🐉", couponCode: "FALOUEDISSE", discountPercent: 15, ctaLabel: "VER LOJA", ctaUrl: LOJA_URL } },
-  end_inc:      { id: "end_inc",      type: "end", dragonVoice: "", question: "", endConfig: { message: "Quando quiser voltar, a gente tá aqui.", couponCode: "FALOUEDISSE", discountPercent: 15, ctaLabel: "VER LOJA", ctaUrl: LOJA_URL } },
-  end_mel:      { id: "end_mel",      type: "end", dragonVoice: "", question: "", endConfig: { message: "Obrigado pela honestidade. Isso vale muito pro Dragão.", couponCode: "FALOUEDISSE", discountPercent: 15, ctaLabel: "VER LOJA", ctaUrl: LOJA_URL } },
-  end_dica:     { id: "end_dica",     type: "end", dragonVoice: "", question: "", endConfig: { message: "Você fez o certo em tentar!", tip: "Misture 20% Comida de Dragão com a ração atual. Continue por 5 dias — muitos pets mudam de ideia.", couponCode: "FALOUEDISSE", discountPercent: 15, ctaLabel: "VER LOJA", ctaUrl: LOJA_URL } },
-  end_how:      { id: "end_how",      type: "end", dragonVoice: "", question: "", endConfig: { message: "O Dragão tem um truque antes de desistir:", tip: "Misture 20% Comida de Dragão com a ração dele, nos primeiros 5 dias. Funciona na maioria dos pets.", couponCode: "FALOUEDISSE", discountPercent: 15, ctaLabel: "VER LOJA", ctaUrl: LOJA_URL } },
-  end_reab:     { id: "end_reab",     type: "end", dragonVoice: "", question: "", endConfig: { message: "O Dragão reservou isso pra você. Sem deixar o estoque acabar de novo! 🐉", couponCode: "VOLTADRAGO", discountPercent: 20, ctaLabel: "REABASTECER AGORA", ctaUrl: LOJA_URL } },
-  end_prod:     { id: "end_prod",     type: "end", dragonVoice: "", question: "", endConfig: { message: "Registrei. O Dragão já foi avisado — chama no WhatsApp.", couponCode: "VOLTADRAGO", discountPercent: 20, ctaLabel: "CHAMAR NO WHATSAPP", ctaUrl: WHATSAPP_URL, showWhatsApp: true } },
-  end_pet:      { id: "end_pet",      type: "end", dragonVoice: "", question: "", endConfig: { message: "O Dragão entende. Quando o pet estiver melhor, a gente tá aqui.", couponCode: "SEMPRESSA", discountPercent: 15, ctaLabel: "VER LOJA", ctaUrl: LOJA_URL } },
-  end_price_at: { id: "end_price_at", type: "end", dragonVoice: "", question: "", endConfig: { message: "O Dragão entende. Aqui vai um presente.", couponCode: "PRECODRAGO", discountPercent: 25, ctaLabel: "USAR CUPOM AGORA", ctaUrl: LOJA_URL } },
-  end_other:    { id: "end_other",    type: "end", dragonVoice: "", question: "", endConfig: { message: "Obrigado por responder. O Dragão leu tudo.", couponCode: "FALOUEDISSE", discountPercent: 15, ctaLabel: "VER LOJA", ctaUrl: LOJA_URL, hasTextField: true, textFieldPlaceholder: "Algo mais que queira compartilhar? (opcional)" } },
-  end_empat:    { id: "end_empat",    type: "end", dragonVoice: "", question: "", endConfig: { message: "Você fez o certo em tentar. Chama no WhatsApp — a gente ajuda.", couponCode: "TENTOUDRAGO", discountPercent: 20, ctaLabel: "CHAMAR NO WHATSAPP", ctaUrl: WHATSAPP_URL, showWhatsApp: true } },
-  end_trick:    { id: "end_trick",    type: "end", dragonVoice: "", question: "", endConfig: { message: "Antes de desistir — esse truque funciona:", tip: "Misture 20% Comida de Dragão + 80% ração, por 5 dias seguidos. O olfato dele vai se acostumar.", couponCode: "TENTOUDRAGO", discountPercent: 20, ctaLabel: "TENTAR DE NOVO", ctaUrl: LOJA_URL } },
-  end_price_in: { id: "end_price_in", type: "end", dragonVoice: "", question: "", endConfig: { message: "O Dragão preparou uma oferta especial pra você voltar.", couponCode: "PRECODRAGO", discountPercent: 25, ctaLabel: "USAR CUPOM AGORA", ctaUrl: LOJA_URL } },
-  end_text:     { id: "end_text",     type: "end", dragonVoice: "", question: "", endConfig: { message: "Obrigado pela honestidade. O Dragão leu tudo.", couponCode: "VOLTADRAGO", discountPercent: 20, ctaLabel: "VER LOJA", ctaUrl: LOJA_URL, hasTextField: true, textFieldPlaceholder: "O que poderia ter sido diferente? (opcional)" } },
-  end_winback:  { id: "end_winback",  type: "end", dragonVoice: "", question: "", endConfig: { message: "Esse cupom é pra provar que vale a pena voltar. O Dragão apostou em você.", couponCode: "SUMIU", discountPercent: 30, ctaLabel: "VOLTAR PRA LOJA", ctaUrl: LOJA_URL } },
-  end_novid:    { id: "end_novid",    type: "end", dragonVoice: "", question: "", endConfig: { message: "O Dragão tem segredos. Fica atento — novidades chegando.", couponCode: "NOVIDADES", discountPercent: 15, ctaLabel: "VER O QUE TEM DE NOVO", ctaUrl: LOJA_URL } },
-  end_text_c:   { id: "end_text_c",   type: "end", dragonVoice: "", question: "", endConfig: { message: "O Dragão ouviu. Sua opinião vai guiar os próximos passos.", couponCode: "VOLTADRAGO", discountPercent: 20, ctaLabel: "VER LOJA", ctaUrl: LOJA_URL, hasTextField: true, textFieldPlaceholder: "O que precisaria mudar? (opcional)" } },
-  end_ok:       { id: "end_ok",       type: "end", dragonVoice: "", question: "", endConfig: { message: "Tudo bem. Se mudar de ideia, a porta está aberta. O Dragão sempre tá aqui.", ctaLabel: "VER LOJA", ctaUrl: LOJA_URL } },
-  end_lead_pos: { id: "end_lead_pos", type: "end", dragonVoice: "", question: "", endConfig: { message: "Que bom! Esse cupom é pra primeira experiência — o Dragão confia que vai valer a pena.", couponCode: "PRIMEIRODRAGO", discountPercent: 20, ctaLabel: "FAZER PRIMEIRA COMPRA", ctaUrl: LOJA_URL } },
-  end_lead_duv: { id: "end_lead_duv", type: "end", dragonVoice: "", question: "", endConfig: { message: "Sua dúvida vai pro Dragão agora. E aqui vai um presente pra primeira vez.", couponCode: "PRIMEIRODRAGO", discountPercent: 20, ctaLabel: "CHAMAR NO WHATSAPP", ctaUrl: WHATSAPP_URL, showWhatsApp: true } },
-  end_lead_novo:{ id: "end_lead_novo",type: "end", dragonVoice: "", question: "", endConfig: { message: "Bem-vindo à revolução. Esse cupom é pra você começar.", couponCode: "DESCOBERTA", discountPercent: 15, ctaLabel: "CONHECER OS PRODUTOS", ctaUrl: LOJA_URL } },
-  end_lead_nao: { id: "end_lead_nao", type: "end", dragonVoice: "", question: "", endConfig: { message: "Tudo bem. Quando a curiosidade bater, o Dragão tá aqui.", ctaLabel: "VER LOJA", ctaUrl: LOJA_URL } },
+  // ════════════════════════════════════════════════════════════════════════════
+  // END STATES
+  // ════════════════════════════════════════════════════════════════════════════
+
+  // ── Positivos ──────────────────────────────────────────────────────────────
+  end_pos: {
+    id: "end_pos", type: "end", dragonVoice: "", question: "",
+    endConfig: { message: "Que bom. O Dragão ficou feliz. Tmj!", couponCode: "FALOUEDISSE", discountPercent: 15, ctaLabel: "VER LOJA", ctaUrl: LOJA_URL },
+  },
+  end_descoberta: {
+    id: "end_descoberta", type: "end", dragonVoice: "", question: "",
+    endConfig: { message: "Tem muito que você ainda não viu. O Dragão preparou um cupom pra você explorar.", couponCode: "DESCOBERTA", discountPercent: 15, ctaLabel: "VER CATÁLOGO COMPLETO", ctaUrl: LOJA_URL },
+  },
+  end_indica_compartilha: {
+    id: "end_indica_compartilha", type: "end", dragonVoice: "", question: "",
+    endConfig: { message: "A revolução se espalha uma indicação de cada vez. Aqui vai um cupom pra você compartilhar com ela.", tip: "Manda esse código pra ela: INDICAFIEL — 20% na primeira compra.", couponCode: "INDICAFIEL", discountPercent: 20, ctaLabel: "VER LOJA", ctaUrl: LOJA_URL },
+  },
+  end_indica_oport: {
+    id: "end_indica_oport", type: "end", dragonVoice: "", question: "",
+    endConfig: { message: "Quando a oportunidade chegar, esse cupom é pra você dividir.", tip: "Guarda esse código: INDICAFIEL — 20% pra quem você indicar.", couponCode: "INDICAFIEL", discountPercent: 20, ctaLabel: "VER LOJA", ctaUrl: LOJA_URL },
+  },
+
+  // ── Melhorias / Feedback ───────────────────────────────────────────────────
+  end_mel: {
+    id: "end_mel", type: "end", dragonVoice: "", question: "",
+    endConfig: { message: "Obrigado pela honestidade. Isso vale mais do que qualquer avaliação 5 estrelas.", couponCode: "FALOUEDISSE", discountPercent: 15, ctaLabel: "VER LOJA", ctaUrl: LOJA_URL },
+  },
+  end_dica: {
+    id: "end_dica", type: "end", dragonVoice: "", question: "",
+    endConfig: { message: "O Dragão anotou. Aqui vai uma dica baseada no que você descreveu:", tip: "Ofereça como petisco depois de atividade ou treino — o apetite ajuda na aceitação. Misture 20% com a ração nos primeiros dias.", couponCode: "FALOUEDISSE", discountPercent: 15, ctaLabel: "VER LOJA", ctaUrl: LOJA_URL },
+  },
+  end_how: {
+    id: "end_how", type: "end", dragonVoice: "", question: "",
+    endConfig: { message: "Antes de desistir — esse truque funciona na maioria dos pets:", tip: "Misture 20% Comida de Dragão + 80% ração, por 5 dias seguidos. O olfato dele vai se acostumar.", couponCode: "TENTOUDRAGO", discountPercent: 20, ctaLabel: "TENTAR DE NOVO", ctaUrl: LOJA_URL },
+  },
+
+  // ── Preço ──────────────────────────────────────────────────────────────────
+  end_price_compraria: {
+    id: "end_price_compraria", type: "end", dragonVoice: "", question: "",
+    endConfig: { message: "O Dragão entende. Aqui vai o maior cupom que temos.", couponCode: "PRECODRAGO", discountPercent: 25, ctaLabel: "USAR CUPOM AGORA", ctaUrl: LOJA_URL },
+  },
+  end_price_at: {
+    id: "end_price_at", type: "end", dragonVoice: "", question: "",
+    endConfig: { message: "O Dragão entende. Aqui vai um presente.", couponCode: "PRECODRAGO", discountPercent: 25, ctaLabel: "USAR CUPOM AGORA", ctaUrl: LOJA_URL },
+  },
+  end_price_in: {
+    id: "end_price_in", type: "end", dragonVoice: "", question: "",
+    endConfig: { message: "O Dragão preparou uma oferta especial pra você voltar.", couponCode: "PRECODRAGO", discountPercent: 25, ctaLabel: "USAR CUPOM AGORA", ctaUrl: LOJA_URL },
+  },
+
+  // ── Reabastecimento ────────────────────────────────────────────────────────
+  end_reab: {
+    id: "end_reab", type: "end", dragonVoice: "", question: "",
+    endConfig: { message: "O Dragão reservou isso pra você. Sem deixar o estoque acabar de novo.", couponCode: "VOLTADRAGO", discountPercent: 20, ctaLabel: "REABASTECER AGORA", ctaUrl: LOJA_URL },
+  },
+
+  // ── Problema produto / pet ─────────────────────────────────────────────────
+  end_prod: {
+    id: "end_prod", type: "end", dragonVoice: "", question: "",
+    endConfig: { message: "Registrei. O Dragão já foi avisado — chama no WhatsApp pra resolver.", couponCode: "VOLTADRAGO", discountPercent: 20, ctaLabel: "CHAMAR NO WHATSAPP", ctaUrl: WHATSAPP_URL, showWhatsApp: true },
+  },
+  end_pet: {
+    id: "end_pet", type: "end", dragonVoice: "", question: "",
+    endConfig: { message: "O Dragão entende. Quando o pet estiver melhor, a gente tá aqui — sem pressão.", couponCode: "SEMPRESSA", discountPercent: 15, ctaLabel: "VER LOJA", ctaUrl: LOJA_URL },
+  },
+  end_empat: {
+    id: "end_empat", type: "end", dragonVoice: "", question: "",
+    endConfig: { message: "Você fez o certo em tentar. Chama no WhatsApp — a gente ajuda a encontrar o jeito certo.", couponCode: "TENTOUDRAGO", discountPercent: 20, ctaLabel: "CHAMAR NO WHATSAPP", ctaUrl: WHATSAPP_URL, showWhatsApp: true },
+  },
+  end_trick: {
+    id: "end_trick", type: "end", dragonVoice: "", question: "",
+    endConfig: { message: "Antes de desistir — esse truque funciona:", tip: "Misture 20% Comida de Dragão + 80% ração, por 5 dias seguidos. O olfato dele vai se acostumar.", couponCode: "TENTOUDRAGO", discountPercent: 20, ctaLabel: "TENTAR DE NOVO", ctaUrl: LOJA_URL },
+  },
+
+  // ── Com texto opcional ─────────────────────────────────────────────────────
+  end_other: {
+    id: "end_other", type: "end", dragonVoice: "", question: "",
+    endConfig: { message: "Obrigado por responder. O Dragão leu tudo.", couponCode: "FALOUEDISSE", discountPercent: 15, ctaLabel: "VER LOJA", ctaUrl: LOJA_URL, hasTextField: true, textFieldPlaceholder: "Algo mais que queira compartilhar? (opcional)" },
+  },
+  end_text: {
+    id: "end_text", type: "end", dragonVoice: "", question: "",
+    endConfig: { message: "Obrigado pela honestidade. O Dragão leu tudo.", couponCode: "VOLTADRAGO", discountPercent: 20, ctaLabel: "VER LOJA", ctaUrl: LOJA_URL, hasTextField: true, textFieldPlaceholder: "O que poderia ter sido diferente? (opcional)" },
+  },
+  end_text_c: {
+    id: "end_text_c", type: "end", dragonVoice: "", question: "",
+    endConfig: { message: "O Dragão ouviu. Sua opinião vai guiar os próximos passos.", couponCode: "VOLTADRAGO", discountPercent: 20, ctaLabel: "VER LOJA", ctaUrl: LOJA_URL, hasTextField: true, textFieldPlaceholder: "O que precisaria mudar? (opcional)" },
+  },
+
+  // ── Churned win-back ───────────────────────────────────────────────────────
+  end_winback: {
+    id: "end_winback", type: "end", dragonVoice: "", question: "",
+    endConfig: { message: "Esse cupom é pra provar que vale a pena voltar. O Dragão apostou em você.", couponCode: "SUMIU", discountPercent: 30, ctaLabel: "VOLTAR PRA LOJA", ctaUrl: LOJA_URL },
+  },
+  end_novid: {
+    id: "end_novid", type: "end", dragonVoice: "", question: "",
+    endConfig: { message: "O Dragão tem segredos. Fica atento — novidades chegando.", couponCode: "NOVIDADES", discountPercent: 15, ctaLabel: "VER O QUE TEM DE NOVO", ctaUrl: LOJA_URL },
+  },
+  end_ok: {
+    id: "end_ok", type: "end", dragonVoice: "", question: "",
+    endConfig: { message: "Tudo bem. Se mudar de ideia, a porta está aberta. O Dragão sempre tá aqui.", ctaLabel: "VER LOJA", ctaUrl: LOJA_URL },
+  },
+
+  // ── Lead ───────────────────────────────────────────────────────────────────
+  end_lead_pos: {
+    id: "end_lead_pos", type: "end", dragonVoice: "", question: "",
+    endConfig: { message: "Esse cupom é pra primeira experiência — o Dragão confia que vai valer a pena.", couponCode: "PRIMEIRODRAGO", discountPercent: 20, ctaLabel: "FAZER PRIMEIRA COMPRA", ctaUrl: LOJA_URL },
+  },
+  end_lead_duv: {
+    id: "end_lead_duv", type: "end", dragonVoice: "", question: "",
+    endConfig: { message: "Sua dúvida vai pro Dragão agora. E aqui vai um presente pra primeira vez.", couponCode: "PRIMEIRODRAGO", discountPercent: 20, ctaLabel: "CHAMAR NO WHATSAPP", ctaUrl: WHATSAPP_URL, showWhatsApp: true },
+  },
+  end_lead_novo: {
+    id: "end_lead_novo", type: "end", dragonVoice: "", question: "",
+    endConfig: { message: "Bem-vindo à revolução. Esse cupom é pra você começar.", couponCode: "DESCOBERTA", discountPercent: 15, ctaLabel: "CONHECER OS PRODUTOS", ctaUrl: LOJA_URL },
+  },
+  end_lead_nao: {
+    id: "end_lead_nao", type: "end", dragonVoice: "", question: "",
+    endConfig: { message: "Tudo bem. Quando a curiosidade bater, o Dragão tá aqui.", ctaLabel: "VER LOJA", ctaUrl: LOJA_URL },
+  },
 };
 
 // ─── HELPERS ───────────────────────────────────────────────────────────────────
@@ -206,13 +401,19 @@ const STEPS: Record<string, SurveyStep> = {
 function resolveNextStep(stepId: string, answer: "yes" | "no", segment: Segment): string {
   const step = STEPS[stepId];
   const raw  = answer === "yes" ? step.onYes : step.onNo;
+  // Q3 do fluxo active: depende do segmento do cliente
   if (raw === "active_q3") {
     return segment === "fiel" || segment === "vip" ? "active_q3_fiel" : "active_q3_nova";
   }
   return raw || "";
 }
 
-// ─── YES/NO BUTTON — urban stamp style ────────────────────────────────────────
+// Conta quantos passos SIM/NÃO (não texto) estão no caminho percorrido
+function countDecisionSteps(history: string[]): number {
+  return history.filter((id) => STEPS[id]?.type === "yesno").length;
+}
+
+// ─── YES/NO BUTTON ─────────────────────────────────────────────────────────────
 
 const YesNoButton = ({
   value, selected, onSelect,
@@ -223,8 +424,7 @@ const YesNoButton = ({
   const base = [
     "flex-1 py-8 md:py-10",
     "border-2 transition-all duration-200 select-none cursor-pointer",
-    "flex flex-col items-center gap-2",
-    "uppercase tracking-wider",
+    "flex flex-col items-center gap-2 uppercase tracking-wider",
   ].join(" ");
 
   const activeStyle = isYes
@@ -270,7 +470,11 @@ export const FeedbackSurvey = () => {
 
   const step        = STEPS[currentId] ?? null;
   const displayName = customerName.split(" ")[0];
-  const progressCurrent = Math.min(history.length + 1, 4);
+
+  // Barra de progresso: baseada nas decisões tomadas
+  const decisionsTaken  = countDecisionSteps(history);
+  const progressCurrent = Math.min(decisionsTaken + 1, 5);
+  const progressTotal   = 5;
 
   // ── Start ──────────────────────────────────────────────────────────────────
   const handleStart = () => {
@@ -314,18 +518,18 @@ export const FeedbackSurvey = () => {
     setIsSubmitting(true);
     try {
       await supabase.from("feedback_responses").insert({
-        customer_name:    customerName,
-        pet_type:         segment,
-        usage_time:       churn,
-        nps_score:        null,
-        expectations:     "survey_v3",
-        motivations:      [],
-        liked_most:       JSON.stringify(textAnswers),
-        would_change:     endTextField || "",
-        pet_acceptance:   "survey_v3",
-        would_repurchase: "survey_v3",
+        customer_name:        customerName,
+        pet_type:             segment,
+        usage_time:           churn,
+        nps_score:            null,
+        expectations:         "survey_v3",
+        motivations:          [],
+        liked_most:           JSON.stringify(textAnswers),
+        would_change:         endTextField || "",
+        pet_acceptance:       "survey_v3",
+        would_repurchase:     "survey_v3",
         no_repurchase_reason: null,
-        ideal_product:    null,
+        ideal_product:        null,
       });
       localStorage.setItem("feedbackAnswers", JSON.stringify({
         customerName, segment, churn,
@@ -349,17 +553,14 @@ export const FeedbackSurvey = () => {
       <div className="grain min-h-screen bg-background flex flex-col items-center justify-center p-6 md:p-10">
         <div className="w-full max-w-lg animate-in fade-in duration-500">
 
-          {/* Logo */}
           <div className="flex justify-center mb-10">
             <img src={logo} alt="Comida de Dragão" className="w-44 md:w-56 h-auto" />
           </div>
 
-          {/* Dragon voice */}
           <p className="text-xs font-special text-muted-foreground italic mb-6 tracking-wide">
             "{ OPENINGS[churn] }"
           </p>
 
-          {/* Main headline */}
           <h1
             className="text-5xl md:text-7xl font-black uppercase leading-none text-foreground mb-2"
             style={{ fontFamily: "'Big Shoulders Display', sans-serif", letterSpacing: "-0.02em" }}
@@ -371,15 +572,12 @@ export const FeedbackSurvey = () => {
             E NÃO.
           </h1>
 
-          {/* Subtext */}
           <p className="text-sm font-special text-muted-foreground mt-4 mb-8">
-            3 minutos. No final tem um mimo especial 🐉
+            5 perguntas. No final tem um mimo especial.
           </p>
 
-          {/* Divider */}
           <div className="w-full h-px bg-border mb-8" />
 
-          {/* Name input — only if not pre-filled */}
           {!name && (
             <div className="mb-6">
               <label
@@ -400,7 +598,6 @@ export const FeedbackSurvey = () => {
             </div>
           )}
 
-          {/* CTA button */}
           <button
             onClick={handleStart}
             disabled={!customerName.trim()}
@@ -425,17 +622,10 @@ export const FeedbackSurvey = () => {
       <div className="grain min-h-screen bg-background flex flex-col items-center justify-center p-6 md:p-10">
         <div className="w-full max-w-lg animate-in fade-in duration-700">
 
-          {/* Logo */}
           <div className="flex justify-center mb-8">
             <img src={logo} alt="Comida de Dragão" className="w-36 md:w-44 h-auto" />
           </div>
 
-          {/* Big dragon */}
-          <div className="text-center mb-4">
-            <span className="text-6xl">🐉</span>
-          </div>
-
-          {/* Name + message */}
           <h1
             className="text-4xl md:text-5xl font-black uppercase text-foreground leading-tight mb-3"
             style={{ fontFamily: "'Big Shoulders Display', sans-serif" }}
@@ -450,7 +640,6 @@ export const FeedbackSurvey = () => {
             {cfg.message}
           </p>
 
-          {/* Tip block */}
           {cfg.tip && (
             <div className="border border-primary/40 p-4 mb-6">
               <p className="text-sm font-special text-foreground leading-relaxed">
@@ -459,11 +648,12 @@ export const FeedbackSurvey = () => {
             </div>
           )}
 
-          {/* Coupon */}
           {cfg.couponCode && (
             <div className="border-2 border-primary p-6 mb-6 text-center">
-              <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3"
-                 style={{ fontFamily: "'Big Shoulders Display', sans-serif" }}>
+              <p
+                className="text-xs uppercase tracking-widest text-muted-foreground mb-3"
+                style={{ fontFamily: "'Big Shoulders Display', sans-serif" }}
+              >
                 SEU CUPOM — {cfg.discountPercent}% OFF
               </p>
               <div
@@ -478,7 +668,6 @@ export const FeedbackSurvey = () => {
             </div>
           )}
 
-          {/* Optional text field */}
           {cfg.hasTextField && (
             <Textarea
               value={endTextField}
@@ -489,7 +678,6 @@ export const FeedbackSurvey = () => {
             />
           )}
 
-          {/* CTA button */}
           <button
             onClick={handleSubmit}
             disabled={isSubmitting}
@@ -499,7 +687,6 @@ export const FeedbackSurvey = () => {
             {isSubmitting ? "ENVIANDO..." : cfg.ctaLabel + " →"}
           </button>
 
-          {/* WhatsApp link */}
           <p className="text-center text-xs font-special text-muted-foreground mt-6">
             Precisou de ajuda?{" "}
             <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
@@ -522,10 +709,8 @@ export const FeedbackSurvey = () => {
     <div className="grain min-h-screen bg-background flex flex-col items-center justify-center p-6 md:p-10">
       <div className="w-full max-w-lg">
 
-        {/* Progress */}
-        <ProgressBar current={progressCurrent} total={4} />
+        <ProgressBar current={progressCurrent} total={progressTotal} />
 
-        {/* Back */}
         <button
           onClick={handleBack}
           className="mt-6 mb-8 text-xs uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors flex items-center gap-2"
@@ -536,12 +721,10 @@ export const FeedbackSurvey = () => {
 
         <div className="animate-in fade-in duration-300" key={currentId}>
 
-          {/* Dragon voice */}
           <p className="text-xs font-special text-muted-foreground italic mb-5 leading-relaxed">
             "{ step.dragonVoice }"
           </p>
 
-          {/* Question */}
           <h2
             className="text-3xl md:text-4xl font-black text-foreground uppercase leading-tight mb-8"
             style={{ fontFamily: "'Big Shoulders Display', sans-serif", letterSpacing: "-0.01em" }}
@@ -549,7 +732,6 @@ export const FeedbackSurvey = () => {
             {step.question}
           </h2>
 
-          {/* YES/NO */}
           {step.type === "yesno" && (
             <div className="flex gap-3">
               <YesNoButton value="yes" selected={selected} onSelect={handleYesNo} />
@@ -557,7 +739,6 @@ export const FeedbackSurvey = () => {
             </div>
           )}
 
-          {/* TEXT */}
           {step.type === "text" && (
             <div className="space-y-4">
               <Textarea
