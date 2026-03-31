@@ -1,92 +1,139 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { ProgressBar } from "@/components/ProgressBar";
-import { QuizNavigation } from "@/components/QuizNavigation";
-import { FeedbackAnswers, initialFeedbackAnswers } from "@/types/feedback";
-import { NPSScale } from "./NPSScale";
-import { RadioOptions } from "./RadioOptions";
-import { CheckboxOptions } from "./CheckboxOptions";
-import { TextAreaWithCounter } from "./TextAreaWithCounter";
-import { QuestionWrapper } from "./QuestionWrapper";
+import { SurveyAnswers, initialSurveyAnswers, YesNo } from "@/types/feedback";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import logo from "@/assets/logo.png";
-import { Input } from "@/components/ui/input";
 
-const TOTAL_QUESTIONS = 9;
+const TOTAL_STEPS = 6; // 0: name, 1-4: yes/no, 5: open text
 
+// ─── YES/NO Button ─────────────────────────────────────────────────────────────
+interface YesNoButtonProps {
+  value: YesNo;
+  selected: YesNo | null;
+  onSelect: (v: YesNo) => void;
+}
+
+const YesNoButton = ({ value, selected, onSelect }: YesNoButtonProps) => {
+  const isSelected = selected === value;
+  const isYes = value === "yes";
+
+  const base =
+    "flex-1 py-6 md:py-8 rounded-2xl text-2xl md:text-3xl font-bold font-special transition-all duration-200 border-2 select-none cursor-pointer flex flex-col items-center gap-2";
+
+  const active = isYes
+    ? "bg-secondary text-secondary-foreground border-secondary scale-105 shadow-lg"
+    : "bg-destructive text-destructive-foreground border-destructive scale-105 shadow-lg";
+
+  const idle =
+    "bg-background text-foreground border-border hover:scale-105 hover:shadow-md";
+
+  return (
+    <button
+      type="button"
+      className={`${base} ${isSelected ? active : idle}`}
+      onClick={() => onSelect(value)}
+    >
+      <span className="text-3xl md:text-4xl">{isYes ? "✅" : "❌"}</span>
+      <span>{isYes ? "SIM" : "NÃO"}</span>
+    </button>
+  );
+};
+
+// ─── Question config ────────────────────────────────────────────────────────────
+const yesNoQuestions: {
+  field: keyof Pick<
+    SurveyAnswers,
+    "petLoved" | "metExpectations" | "wouldRecommend" | "wouldRepurchase"
+  >;
+  dragonVoice: string;
+  question: string;
+}[] = [
+  {
+    field: "petLoved",
+    dragonVoice: "O Dragão viu tudo. Mas quer ouvir de você 👀",
+    question: "Seu pet amou a Comida de Dragão?",
+  },
+  {
+    field: "metExpectations",
+    dragonVoice: "Sem filtro — o Dragão só quer a verdade 🐉",
+    question: "O produto foi o que você esperava?",
+  },
+  {
+    field: "wouldRecommend",
+    dragonVoice: "A revolução cresce com a sua voz 🌿",
+    question: "Você indicaria pra outro tutor?",
+  },
+  {
+    field: "wouldRepurchase",
+    dragonVoice: "Essa é a mais importante. O Dragão precisa saber.",
+    question: "Você compraria de novo?",
+  },
+];
+
+// ─── Main Survey Component ─────────────────────────────────────────────────────
 export const FeedbackSurvey = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [surveyStarted, setSurveyStarted] = useState(false);
-  const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [answers, setAnswers] = useState<FeedbackAnswers>(initialFeedbackAnswers);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [answers, setAnswers] = useState<SurveyAnswers>(initialSurveyAnswers);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // ─── Navigation ──────────────────────────────────────────────────────────────
   const canProceed = (): boolean => {
-    switch (currentQuestion) {
-      case 0: // Name
-        return answers.customerName.trim() !== "";
-      case 1: // Context
-        return answers.petType !== "" && answers.usageTime !== "" && 
-               (answers.petType !== "other" || (answers.petTypeOther?.trim() || "") !== "");
-      case 2: // NPS
-        return answers.npsScore !== null;
-      case 3: // Expectations
-        return answers.expectations !== "";
-      case 4: // Motivation
-        return answers.motivations.length > 0 &&
-               (!answers.motivations.includes("other") || (answers.motivationOther?.trim() || "") !== "");
-      case 5: // Strengths/Weaknesses
-        return answers.likedMost.trim() !== "" && answers.wouldChange.trim() !== "";
-      case 6: // Acceptance
-        if (answers.petAcceptance === "") return false;
-        if (answers.petAcceptance === "rejected" && !answers.rejectionAction) return false;
-        return true;
-      case 7: // Repurchase
-        return answers.wouldRepurchase !== "";
-      case 8: // Ideal Product (optional)
-        return true;
-      default:
-        return false;
-    }
+    if (currentStep === 0) return answers.customerName.trim() !== "";
+    return true; // all other steps are optional or auto-advance
+  };
+
+  const handleYesNo = (
+    field: keyof SurveyAnswers,
+    value: YesNo
+  ) => {
+    setAnswers((prev) => ({ ...prev, [field]: value }));
+    setTimeout(() => {
+      if (currentStep < TOTAL_STEPS - 1) {
+        setCurrentStep((prev) => prev + 1);
+      }
+    }, 350);
+  };
+
+  const handleBack = () => {
+    if (currentStep > 0) setCurrentStep((prev) => prev - 1);
   };
 
   const handleNext = async () => {
-    if (currentQuestion < TOTAL_QUESTIONS - 1) {
-      setCurrentQuestion((prev) => prev + 1);
+    if (currentStep < TOTAL_STEPS - 1) {
+      setCurrentStep((prev) => prev + 1);
     } else {
       await submitSurvey();
     }
   };
 
-  const handleBack = () => {
-    if (currentQuestion > 0) {
-      setCurrentQuestion((prev) => prev - 1);
-    }
-  };
-
+  // ─── Submit ───────────────────────────────────────────────────────────────────
   const submitSurvey = async () => {
     setIsSubmitting(true);
     try {
       const { error } = await supabase.from("feedback_responses").insert({
         customer_name: answers.customerName,
-        pet_type: answers.petType,
-        pet_type_other: answers.petTypeOther || null,
-        usage_time: answers.usageTime,
-        nps_score: answers.npsScore,
-        expectations: answers.expectations,
-        expectations_reason: answers.expectationsReason || null,
-        motivations: answers.motivations,
-        motivation_other: answers.motivationOther || null,
-        liked_most: answers.likedMost,
-        would_change: answers.wouldChange,
-        pet_acceptance: answers.petAcceptance,
-        rejection_action: answers.rejectionAction || null,
-        would_repurchase: answers.wouldRepurchase,
-        no_repurchase_reason: answers.noRepurchaseReason || null,
-        ideal_product: answers.idealProduct || null,
+        pet_type: "survey_v2",
+        usage_time: "n/a",
+        nps_score: null,
+        expectations:
+          answers.metExpectations === "yes" ? "exceeded" : "not_met",
+        motivations: [],
+        liked_most:
+          answers.wouldRecommend === "yes" ? "yes_recommend" : "no_recommend",
+        would_change: answers.improvement || "",
+        pet_acceptance: answers.petLoved === "yes" ? "loved" : "rejected",
+        would_repurchase:
+          answers.wouldRepurchase === "yes" ? "yes_definitely" : "no",
+        no_repurchase_reason: null,
+        ideal_product: null,
       });
 
       if (error) throw error;
@@ -97,7 +144,8 @@ export const FeedbackSurvey = () => {
       console.error("Error submitting feedback:", error);
       toast({
         title: "Erro ao enviar",
-        description: "Não foi possível enviar suas respostas. Tente novamente.",
+        description:
+          "Não foi possível enviar suas respostas. Tente novamente.",
         variant: "destructive",
       });
     } finally {
@@ -105,254 +153,183 @@ export const FeedbackSurvey = () => {
     }
   };
 
+  // ─── Welcome Screen ───────────────────────────────────────────────────────────
   if (!surveyStarted) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
-        <div className="w-full max-w-2xl text-center animate-fade-in">
+        <div className="w-full max-w-lg text-center animate-in fade-in duration-500">
           <div className="mb-8">
             <div className="mb-6 flex justify-center">
-              <img src={logo} alt="Comida de Dragão" className="w-64 md:w-80 h-auto" />
+              <img
+                src={logo}
+                alt="Comida de Dragão"
+                className="w-56 md:w-72 h-auto"
+              />
             </div>
-            <h1 className="text-3xl md:text-5xl font-special font-bold text-question mb-6">
-              🐉 O Dragão quer ouvir você!
-            </h1>
-            <p className="text-lg md:text-xl font-special text-muted-foreground mb-4">
-              Sua experiência com nossos produtos ajuda a gente a criar produtos ainda melhores.
+            <p className="text-sm font-special text-muted-foreground uppercase tracking-widest mb-4">
+              O Dragão me contou que você experimentou algo diferente.
             </p>
-            <p className="text-base md:text-lg font-special text-foreground mb-6">
-              São só 2 minutos. No final você ganha um <span className="font-bold text-primary">cupom especial</span> 💚
+            <h1 className="text-3xl md:text-4xl font-special font-bold text-question mb-4 leading-tight">
+              Conta pra gente como foi? 🐉
+            </h1>
+            <p className="text-base md:text-lg font-special text-foreground mb-2">
+              São <span className="font-bold">3 minutos</span>. Só sim e não.
+            </p>
+            <p className="text-base font-special text-muted-foreground mb-8">
+              No final tem um{" "}
+              <span className="font-bold text-primary">mimo especial</span>{" "}
+              esperando 💚
             </p>
           </div>
           <Button
             onClick={() => setSurveyStarted(true)}
             size="lg"
-            className="text-lg font-special px-16 py-6 h-auto hover:scale-105 transition-transform"
+            className="text-xl font-special px-16 py-6 h-auto rounded-full hover:scale-105 transition-transform"
           >
-            Começar
+            Bora lá!
           </Button>
         </div>
       </div>
     );
   }
 
+  // ─── Survey Steps ─────────────────────────────────────────────────────────────
+  const firstName = answers.customerName.split(" ")[0] || "";
+
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
-      <div className="w-full max-w-4xl">
-        <ProgressBar current={currentQuestion + 1} total={TOTAL_QUESTIONS} />
-        
-        <div className="mt-8">
-          {currentQuestion === 0 && (
-            <QuestionWrapper title="Qual é o seu nome?">
+      <div className="w-full max-w-lg">
+        {/* Progress */}
+        <ProgressBar current={currentStep + 1} total={TOTAL_STEPS} />
+
+        {/* Back button */}
+        {currentStep > 0 && (
+          <button
+            onClick={handleBack}
+            className="mt-4 text-sm font-special text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+          >
+            ← Voltar
+          </button>
+        )}
+
+        <div
+          className="mt-8 animate-in fade-in duration-300"
+          key={currentStep}
+        >
+          {/* ─ Step 0: Name ─ */}
+          {currentStep === 0 && (
+            <div className="space-y-6 text-center">
+              <p className="text-sm font-special text-muted-foreground italic">
+                "O Dragão me pediu pra começar pelo começo."
+              </p>
+              <h2 className="text-2xl md:text-3xl font-special font-bold text-question">
+                Qual é o seu nome?
+              </h2>
               <Input
                 type="text"
                 value={answers.customerName}
-                onChange={(e) => setAnswers({ ...answers, customerName: e.target.value })}
-                placeholder="Digite seu nome"
-                className="text-lg py-6 text-center font-special"
+                onChange={(e) =>
+                  setAnswers({ ...answers, customerName: e.target.value })
+                }
+                onKeyDown={(e) =>
+                  e.key === "Enter" && canProceed() && handleNext()
+                }
+                placeholder="Digite seu nome..."
+                className="text-xl py-6 text-center font-special rounded-xl"
                 autoFocus
               />
-            </QuestionWrapper>
-          )}
-
-          {currentQuestion === 1 && (
-            <div className="space-y-8">
-              <QuestionWrapper title="Para qual pet você comprou?">
-                <RadioOptions
-                  options={[
-                    { value: "dog", label: "🐕 Cão" },
-                    { value: "cat", label: "🐈 Gato" },
-                    { value: "reptile", label: "🦎 Réptil/Anfíbio" },
-                  ]}
-                  value={answers.petType}
-                  onChange={(v) => setAnswers({ ...answers, petType: v })}
-                  showOther
-                  otherValue={answers.petTypeOther}
-                  onOtherChange={(v) => setAnswers({ ...answers, petTypeOther: v })}
-                />
-              </QuestionWrapper>
-              
-              <QuestionWrapper title="Há quanto tempo você está usando o produto?">
-                <RadioOptions
-                  options={[
-                    { value: "first_time", label: "Primeira vez / Acabei de receber" },
-                    { value: "less_than_1_month", label: "Menos de 1 mês" },
-                    { value: "1_to_3_months", label: "1-3 meses" },
-                    { value: "more_than_3_months", label: "Mais de 3 meses" },
-                  ]}
-                  value={answers.usageTime}
-                  onChange={(v) => setAnswers({ ...answers, usageTime: v })}
-                />
-              </QuestionWrapper>
+              <Button
+                onClick={handleNext}
+                disabled={!canProceed()}
+                size="lg"
+                className="w-full text-lg font-special py-6 rounded-full"
+              >
+                Continuar
+              </Button>
             </div>
           )}
 
-          {currentQuestion === 2 && (
-            <QuestionWrapper 
-              title="Numa escala de 0 a 10, o quanto você recomendaria Comida de Dragão para outro tutor?"
-            >
-              <NPSScale
-                value={answers.npsScore}
-                onChange={(v) => setAnswers({ ...answers, npsScore: v })}
+          {/* ─ Steps 1–4: YES/NO ─ */}
+          {currentStep >= 1 &&
+            currentStep <= 4 &&
+            (() => {
+              const q = yesNoQuestions[currentStep - 1];
+              return (
+                <div className="space-y-6 text-center">
+                  <p className="text-sm font-special text-muted-foreground italic">
+                    "{q.dragonVoice}"
+                  </p>
+                  <h2 className="text-2xl md:text-3xl font-special font-bold text-question leading-tight">
+                    {q.question}
+                  </h2>
+                  {firstName && (
+                    <p className="text-sm font-special text-muted-foreground">
+                      ({firstName}, pode ser direto — o Dragão prefere assim 😄)
+                    </p>
+                  )}
+                  <div className="flex gap-4 mt-6">
+                    <YesNoButton
+                      value="yes"
+                      selected={answers[q.field] as YesNo | null}
+                      onSelect={(v) => handleYesNo(q.field, v)}
+                    />
+                    <YesNoButton
+                      value="no"
+                      selected={answers[q.field] as YesNo | null}
+                      onSelect={(v) => handleYesNo(q.field, v)}
+                    />
+                  </div>
+                </div>
+              );
+            })()}
+
+          {/* ─ Step 5: Open text (optional) ─ */}
+          {currentStep === 5 && (
+            <div className="space-y-6 text-center">
+              <p className="text-sm font-special text-muted-foreground italic">
+                "Opcional — mas vale muito. O Dragão lê tudo."
+              </p>
+              <h2 className="text-2xl md:text-3xl font-special font-bold text-question leading-tight">
+                Tem algo que poderia ter sido melhor?
+              </h2>
+              <p className="text-sm font-special text-muted-foreground">
+                Sua ideia pode virar realidade 🪲
+              </p>
+              <Textarea
+                value={answers.improvement || ""}
+                onChange={(e) =>
+                  setAnswers({ ...answers, improvement: e.target.value })
+                }
+                placeholder="Escreva aqui (opcional)..."
+                className="font-special text-base rounded-xl min-h-[120px] resize-none"
+                maxLength={300}
               />
-            </QuestionWrapper>
-          )}
-
-          {currentQuestion === 3 && (
-            <div className="space-y-8">
-              <QuestionWrapper title="O produto atendeu às suas expectativas?">
-                <RadioOptions
-                  options={[
-                    { value: "exceeded", label: "Sim, superou! 🎉" },
-                    { value: "met", label: "Sim, atendeu" },
-                    { value: "partial", label: "Parcialmente" },
-                    { value: "not_met", label: "Não atendeu" },
-                    { value: "cant_evaluate", label: "Ainda não deu pra avaliar" },
-                  ]}
-                  value={answers.expectations}
-                  onChange={(v) => setAnswers({ ...answers, expectations: v })}
-                />
-              </QuestionWrapper>
-              
-              {(answers.expectations === "partial" || answers.expectations === "not_met") && (
-                <QuestionWrapper title="Se não atendeu ou foi parcial, por quê?">
-                  <TextAreaWithCounter
-                    value={answers.expectationsReason || ""}
-                    onChange={(v) => setAnswers({ ...answers, expectationsReason: v })}
-                    placeholder="Opcional - nos ajuda a melhorar"
-                    required={false}
-                  />
-                </QuestionWrapper>
+              {answers.improvement && (
+                <p className="text-xs font-special text-muted-foreground text-right">
+                  {answers.improvement.length}/300
+                </p>
               )}
+              <Button
+                onClick={handleNext}
+                disabled={isSubmitting}
+                size="lg"
+                className="w-full text-lg font-special py-6 rounded-full"
+              >
+                {isSubmitting ? "Enviando..." : "Enviar pesquisa 🐉"}
+              </Button>
+              <button
+                onClick={() => {
+                  setAnswers((prev) => ({ ...prev, improvement: "" }));
+                  handleNext();
+                }}
+                className="text-sm font-special text-muted-foreground hover:text-foreground underline-offset-2 hover:underline transition-colors"
+                disabled={isSubmitting}
+              >
+                Pular
+              </button>
             </div>
-          )}
-
-          {currentQuestion === 4 && (
-            <QuestionWrapper title="O que te motivou a experimentar proteína de inseto?">
-              <CheckboxOptions
-                options={[
-                  { value: "sustainability", label: "🌱 Sustentabilidade / Impacto ambiental" },
-                  { value: "allergy", label: "🩺 Alergia do pet a proteínas convencionais" },
-                  { value: "curiosity", label: "💡 Curiosidade / Inovação" },
-                  { value: "vet_recommendation", label: "👨‍⚕️ Recomendação veterinária" },
-                  { value: "nutrition", label: "💪 Qualidade nutricional" },
-                  { value: "digestive_issues", label: "🔄 Problemas digestivos do pet" },
-                ]}
-                values={answers.motivations}
-                onChange={(v) => setAnswers({ ...answers, motivations: v })}
-                maxSelections={2}
-                showOther
-                otherValue={answers.motivationOther}
-                onOtherChange={(v) => setAnswers({ ...answers, motivationOther: v })}
-              />
-            </QuestionWrapper>
-          )}
-
-          {currentQuestion === 5 && (
-            <div className="space-y-8">
-              <QuestionWrapper title="O que você MAIS GOSTOU no produto?">
-                <TextAreaWithCounter
-                  value={answers.likedMost}
-                  onChange={(v) => setAnswers({ ...answers, likedMost: v })}
-                  placeholder="Conte o que mais te agradou..."
-                  required
-                />
-              </QuestionWrapper>
-              
-              <QuestionWrapper title="Se pudesse mudar UMA COISA no produto, o que seria?">
-                <TextAreaWithCounter
-                  value={answers.wouldChange}
-                  onChange={(v) => setAnswers({ ...answers, wouldChange: v })}
-                  placeholder="Sua sugestão de melhoria..."
-                  required
-                />
-              </QuestionWrapper>
-            </div>
-          )}
-
-          {currentQuestion === 6 && (
-            <div className="space-y-8">
-              <QuestionWrapper title="Como foi a aceitação do seu pet?">
-                <RadioOptions
-                  options={[
-                    { value: "loved", label: "Amou de cara! 😍" },
-                    { value: "accepted", label: "Aceitou bem" },
-                    { value: "accepted_after_tries", label: "Aceitou depois de algumas tentativas" },
-                    { value: "rejected", label: "Rejeitou / Não quis comer" },
-                    { value: "not_offered", label: "Ainda não ofereci" },
-                  ]}
-                  value={answers.petAcceptance}
-                  onChange={(v) => setAnswers({ ...answers, petAcceptance: v, rejectionAction: undefined })}
-                />
-              </QuestionWrapper>
-              
-              {answers.petAcceptance === "rejected" && (
-                <QuestionWrapper title="Se rejeitou, você:">
-                  <RadioOptions
-                    options={[
-                      { value: "mixed", label: "Tentou misturar com a ração atual" },
-                      { value: "different_time", label: "Ofereceu em outro horário" },
-                      { value: "gave_up", label: "Desistiu" },
-                      { value: "contacted_us", label: "Entrou em contato com a gente" },
-                    ]}
-                    value={answers.rejectionAction || ""}
-                    onChange={(v) => setAnswers({ ...answers, rejectionAction: v })}
-                  />
-                </QuestionWrapper>
-              )}
-            </div>
-          )}
-
-          {currentQuestion === 7 && (
-            <div className="space-y-8">
-              <QuestionWrapper title="Você compraria novamente?">
-                <RadioOptions
-                  options={[
-                    { value: "yes_definitely", label: "Sim, com certeza!" },
-                    { value: "yes_probably", label: "Sim, provavelmente" },
-                    { value: "maybe", label: "Talvez (depende de X)" },
-                    { value: "no", label: "Não" },
-                  ]}
-                  value={answers.wouldRepurchase}
-                  onChange={(v) => setAnswers({ ...answers, wouldRepurchase: v })}
-                />
-              </QuestionWrapper>
-              
-              {(answers.wouldRepurchase === "no" || answers.wouldRepurchase === "maybe") && (
-                <QuestionWrapper title="Se não, por quê?">
-                  <TextAreaWithCounter
-                    value={answers.noRepurchaseReason || ""}
-                    onChange={(v) => setAnswers({ ...answers, noRepurchaseReason: v })}
-                    placeholder="Opcional - queremos entender"
-                    required={false}
-                  />
-                </QuestionWrapper>
-              )}
-            </div>
-          )}
-
-          {currentQuestion === 8 && (
-            <QuestionWrapper 
-              title="Que produto você gostaria que a gente criasse?"
-              subtitle="Exemplos: ração completa, sachê, outro sabor, outro formato..."
-            >
-              <TextAreaWithCounter
-                value={answers.idealProduct || ""}
-                onChange={(v) => setAnswers({ ...answers, idealProduct: v })}
-                placeholder="Opcional - sua ideia pode virar realidade"
-                required={false}
-              />
-            </QuestionWrapper>
           )}
         </div>
-
-        <QuizNavigation
-          onBack={handleBack}
-          onNext={handleNext}
-          showBack={currentQuestion > 0}
-          isLastQuestion={currentQuestion === TOTAL_QUESTIONS - 1}
-          canProceed={canProceed()}
-          isSubmitting={isSubmitting}
-        />
       </div>
     </div>
   );
