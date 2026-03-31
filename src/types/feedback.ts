@@ -1,30 +1,26 @@
-export type YesNo = 'yes' | 'no';
+export type ChurnStatus = 'active' | 'at_risk' | 'inactive' | 'churned' | 'lead';
+export type Segment = 'primeira' | 'recorrente' | 'fiel' | 'vip';
+export type StepType = 'yesno' | 'text' | 'end';
 
-export interface SurveyAnswers {
-  // Step 0: Name
-  customerName: string;
-
-  // Step 1: Pet loved it?
-  petLoved: YesNo | null;
-
-  // Step 2: Met expectations?
-  metExpectations: YesNo | null;
-
-  // Step 3: Would recommend?
-  wouldRecommend: YesNo | null;
-
-  // Step 4: Would repurchase?
-  wouldRepurchase: YesNo | null;
-
-  // Step 5: Open feedback (optional)
-  improvement?: string;
+export interface EndConfig {
+  message: string;
+  tip?: string;
+  couponCode?: string;
+  discountPercent?: number;
+  ctaLabel: string;
+  ctaUrl: string;
+  showWhatsApp?: boolean;
+  hasTextField?: boolean;
+  textFieldPlaceholder?: string;
 }
 
-export const initialSurveyAnswers: SurveyAnswers = {
-  customerName: '',
-  petLoved: null,
-  metExpectations: null,
-  wouldRecommend: null,
-  wouldRepurchase: null,
-  improvement: '',
-};
+export interface SurveyStep {
+  id: string;
+  dragonVoice: string;
+  question: string;
+  type: StepType;
+  textPlaceholder?: string;
+  onYes?: string;
+  onNo?: string;
+  endConfig?: EndConfig;
+}
