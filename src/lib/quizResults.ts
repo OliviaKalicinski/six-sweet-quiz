@@ -53,18 +53,61 @@ const products: Product[] = [
 ];
 
 export const calculateResult = (answers: QuizAnswers): Product => {
-  // Extract answers for all 7 questions
-  const q1 = answers[1]; // Pet type
-  const q2 = answers[2]; // Comfort with insects
-  const q3 = answers[3]; // What you seek for your pet
-  const q4 = answers[4]; // Food problems
-  const q5 = answers[5]; // How to give the food
-  const q6 = answers[6]; // Benefits you value
-  const q7 = answers[7]; // What weighs more in your choice
+  const q1 = answers[1]; // Pet type: A=Cachorro, B=Gato, C=Réptil/Anfíbio, D=Ave/peixe/outro
+  const q3 = answers[3]; // What you seek: A=Petisco, B=Suplementar, C=Substituir insetos vivos, D=Lanche funcional
+  const q4 = answers[4]; // Food problems: A=Alergias, B=100% natural, C=Não sei, D=Nutrientes específicos (taurina)
+  const q5 = answers[5]; // How to give: A=Ingrediente único, B=Suplementar ração, C=Animal exótico, D=Biscoitinho
+  const q6 = answers[6]; // Benefits: A=Máx proteína, B=Antioxidantes/anti-inf, C=Energia balanceada, D=Ômegas
+  const q7 = answers[7]; // Choice factor: A=Praticidade, B=Versatilidade, C=Inovação, D=Ingredientes premium
 
-  // TODO: Add your custom logic here to determine which product to recommend
-  // based on the 7 answers (q1 through q7)
-  
-  // For now, returning the default "original" product as a placeholder
+  // Répteis, anfíbios → GRUB
+  if (q1 === "C") return products.find(p => p.id === "grub")!;
+
+  // Gatos → Suplemento Felino
+  if (q1 === "B") return products.find(p => p.id === "suplemento-gatos")!;
+
+  // Aves, peixes, outros pequenos → Original (mais versátil)
+  if (q1 === "D") return products.find(p => p.id === "original")!;
+
+  // A partir daqui: Cachorro (q1 === "A")
+
+  // Quer substituir insetos vivos → GRUB
+  if (q5 === "C") return products.find(p => p.id === "grub")!;
+
+  // Quer biscoitinho com ingredientes extras
+  if (q5 === "D" || q3 === "D") {
+    // Antioxidantes / anti-inflamatórios → Spirulina
+    if (q6 === "B" || q7 === "D") return products.find(p => p.id === "mordida-spirulina")!;
+    // Padrão biscoitinho → Legumes
+    return products.find(p => p.id === "mordida-legumes")!;
+  }
+
+  // Suplementar a ração
+  if (q3 === "B" || q5 === "B") {
+    // Máxima proteína → Concentrado
+    if (q6 === "A") return products.find(p => p.id === "suplemento-concentrado")!;
+    // Ômegas preservados → Integral
+    if (q6 === "D") return products.find(p => p.id === "suplemento-integral")!;
+    // Nutrientes específicos (taurina) → Suplemento Felino só se gato — já tratado acima; para cão → Integral
+    if (q4 === "D") return products.find(p => p.id === "suplemento-integral")!;
+    // Padrão suplementação → Concentrado
+    return products.find(p => p.id === "suplemento-concentrado")!;
+  }
+
+  // Quer ingrediente único puro
+  if (q5 === "A" || q3 === "A") {
+    return products.find(p => p.id === "original")!;
+  }
+
+  // Alergias ou 100% natural → Original (ingrediente único, hipoalergênico)
+  if (q4 === "A" || q4 === "B") return products.find(p => p.id === "original")!;
+
+  // Praticidade / versatilidade → Original
+  if (q7 === "A" || q7 === "B") return products.find(p => p.id === "original")!;
+
+  // Ingredientes premium com superalimentos → Spirulina
+  if (q7 === "D" || q6 === "B") return products.find(p => p.id === "mordida-spirulina")!;
+
+  // Fallback
   return products.find(p => p.id === "original")!;
 };
