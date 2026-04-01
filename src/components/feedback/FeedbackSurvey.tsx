@@ -818,6 +818,10 @@ export const FeedbackSurvey = () => {
               PULAR
             </button>
 
+            <p className="text-center text-xs font-special text-muted-foreground mt-4 leading-relaxed">
+              O Dragão respeita. Se não quiser deixar, só pula.
+            </p>
+
           </div>
         </div>
       );
