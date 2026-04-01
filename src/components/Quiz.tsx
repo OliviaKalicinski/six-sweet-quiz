@@ -14,6 +14,16 @@ interface Question {
 
 const questions: Question[] = [
   {
+    id: 0,
+    question: "Você já provou Comida de Dragão?",
+    options: [
+      { value: "A", label: "A) ✅ Sim, já experimentei!" },
+      { value: "B", label: "B) 👀 Ainda não, mas tenho curiosidade" },
+      { value: "C", label: "C) 🤔 Ouvi falar mas nunca comprei" },
+      { value: "D", label: "D) ❌ Não conheço ainda" },
+    ],
+  },
+  {
     id: 1,
     question: "Qual é o seu pet?",
     options: [
