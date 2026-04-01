@@ -7,6 +7,9 @@ const WHATSAPP_URL = "https://wa.me/552139500576";
 const Results = () => {
   const couponCode = "FALOUEDISSE";
   const [firstName, setFirstName] = useState("");
+  const [phone, setPhone]         = useState("");
+  const [submitted, setSubmitted] = useState(false);
+  const [error, setError]         = useState("");
 
   useEffect(() => {
     const stored = localStorage.getItem("feedbackAnswers");
@@ -18,6 +21,96 @@ const Results = () => {
     }
   }, []);
 
+  const formatPhone = (value: string) => {
+    const digits = value.replace(/\D/g, "").slice(0, 11);
+    if (digits.length <= 2)  return digits;
+    if (digits.length <= 7)  return `(${digits.slice(0,2)}) ${digits.slice(2)}`;
+    return `(${digits.slice(0,2)}) ${digits.slice(2,7)}-${digits.slice(7)}`;
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPhone(formatPhone(e.target.value));
+    setError("");
+  };
+
+  const handlePhoneSubmit = () => {
+    const digits = phone.replace(/\D/g, "");
+    if (digits.length < 10) {
+      setError("Telefone inválido. Coloca DDD + número.");
+      return;
+    }
+    localStorage.setItem("feedbackPhone", phone);
+    setSubmitted(true);
+  };
+
+  // ── GATE: coleta telefone antes do cupom ────────────────────────────────────
+  if (!submitted) {
+    return (
+      <div className="grain min-h-screen bg-background flex flex-col items-center justify-center p-6 md:p-10">
+        <div className="w-full max-w-lg animate-in fade-in duration-500">
+
+          <div className="flex justify-center mb-10">
+            <img src={logo} alt="Comida de Dragão" className="w-36 md:w-44 h-auto" />
+          </div>
+
+          <div className="text-center mb-4">
+            <span className="text-6xl">🐉</span>
+          </div>
+
+          <h1
+            className="text-4xl md:text-5xl font-black uppercase text-foreground leading-tight mb-3"
+            style={{ fontFamily: "'Big Shoulders Display', sans-serif" }}
+          >
+            {firstName
+              ? <>{firstName},<br /><span className="text-primary">QUASE LÁ.</span></>
+              : <span className="text-primary">QUASE LÁ.</span>
+            }
+          </h1>
+
+          <p className="text-base font-special text-muted-foreground mb-8 leading-relaxed">
+            O Dragão preparou um cupom especial pra você. Deixa seu telefone e a gente libera.
+          </p>
+
+          <div className="mb-2">
+            <label
+              className="block text-xs uppercase tracking-widest text-muted-foreground mb-2"
+              style={{ fontFamily: "'Big Shoulders Display', sans-serif" }}
+            >
+              Seu WhatsApp
+            </label>
+            <input
+              type="tel"
+              value={phone}
+              onChange={handlePhoneChange}
+              onKeyDown={(e) => e.key === "Enter" && handlePhoneSubmit()}
+              placeholder="(21) 99999-9999"
+              className="w-full bg-transparent border-b-2 border-foreground/30 focus:border-primary outline-none text-foreground text-xl py-2 font-special transition-colors placeholder:text-muted-foreground"
+              autoFocus
+            />
+            {error && (
+              <p className="text-xs text-destructive mt-2 font-special">{error}</p>
+            )}
+          </div>
+
+          <p className="text-xs text-muted-foreground font-special mb-8 mt-3">
+            Só pra mandar o cupom. Sem spam, promessa de Dragão.
+          </p>
+
+          <button
+            onClick={handlePhoneSubmit}
+            disabled={!phone.trim()}
+            className="w-full py-5 bg-primary text-primary-foreground text-2xl font-black uppercase tracking-wider hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+            style={{ fontFamily: "'Big Shoulders Display', sans-serif" }}
+          >
+            QUERO MEU CUPOM →
+          </button>
+
+        </div>
+      </div>
+    );
+  }
+
+  // ── CUPOM ───────────────────────────────────────────────────────────────────
   return (
     <div className="grain min-h-screen bg-background flex flex-col items-center justify-center p-6 md:p-10">
       <div className="w-full max-w-lg animate-in fade-in duration-700">
