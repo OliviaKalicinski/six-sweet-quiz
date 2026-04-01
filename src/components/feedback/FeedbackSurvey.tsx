@@ -20,7 +20,17 @@ const OPENINGS: Record<ChurnStatus, string> = {
   lead:     "O Dragão tem um recado especial pra você. Pode ser direto?",
 };
 
+// Todos os fluxos começam pelo gate "já experimentou?"
 const ENTRY_STEPS: Record<ChurnStatus, string> = {
+  active:   "gate_tried",
+  at_risk:  "gate_tried",
+  inactive: "gate_tried",
+  churned:  "gate_tried",
+  lead:     "gate_tried",
+};
+
+// Após o gate, quem respondeu SIM vai pro fluxo original do churn
+const CHURN_ENTRY: Record<ChurnStatus, string> = {
   active:   "active_q1",
   at_risk:  "risk_q1",
   inactive: "inactive_q1",
@@ -31,6 +41,87 @@ const ENTRY_STEPS: Record<ChurnStatus, string> = {
 // ─── ALL SURVEY STEPS ──────────────────────────────────────────────────────────
 
 const STEPS: Record<string, SurveyStep> = {
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // GATE — Você já experimentou Comida de Dragão?
+  // ════════════════════════════════════════════════════════════════════════════
+
+  gate_tried: {
+    id: "gate_tried", type: "yesno",
+    dragonVoice: "O Dragão quer saber uma coisa antes de tudo.",
+    question: "VOCÊ JÁ EXPERIMENTOU COMIDA DE DRAGÃO?",
+    onYes: "__churn_entry__",     // resolvido em runtime → vai pro fluxo do churn
+    onNo:  "nottried_q1",
+  },
+
+  // ── Fluxo NÃO EXPERIMENTOU ────────────────────────────────────────────────
+
+  nottried_q1: {
+    id: "nottried_q1", type: "yesno",
+    dragonVoice: "Sem julgamento — o Dragão só quer entender.",
+    question: "VOCÊ JÁ OUVIU FALAR DA COMIDA DE DRAGÃO?",
+    onYes: "nottried_q2_conhece",
+    onNo:  "nottried_q2_nao_conhece",
+  },
+
+  nottried_q2_conhece: {
+    id: "nottried_q2_conhece", type: "yesno",
+    dragonVoice: "O Dragão quer saber o que te travou.",
+    question: "ALGUMA COISA TE IMPEDIU DE EXPERIMENTAR?",
+    onYes: "nottried_q3_barreira",
+    onNo:  "end_nottried_curioso",
+  },
+
+  nottried_q3_barreira: {
+    id: "nottried_q3_barreira", type: "yesno",
+    dragonVoice: "Direto ao ponto — o Dragão respeita seu tempo.",
+    question: "FOI POR PREÇO?",
+    onYes: "end_nottried_preco",
+    onNo:  "nottried_q4_psico",
+  },
+
+  nottried_q4_psico: {
+    id: "nottried_q4_psico", type: "yesno",
+    dragonVoice: "O Dragão entende — insetos causam estranheza no começo.",
+    question: "FOI PELA BARREIRA PSICOLÓGICA COM INSETOS?",
+    onYes: "end_nottried_barreira",
+    onNo:  "end_nottried_outro",
+  },
+
+  nottried_q2_nao_conhece: {
+    id: "nottried_q2_nao_conhece", type: "yesno",
+    dragonVoice: "Proteína de inseto pra pets — sustentável, hipoalergênica, nutritiva.",
+    question: "QUER CONHECER?",
+    onYes: "end_nottried_novo",
+    onNo:  "end_nottried_nao",
+  },
+
+  // ── END STATES — NÃO EXPERIMENTOU ─────────────────────────────────────────
+
+  end_nottried_curioso: {
+    id: "end_nottried_curioso", type: "end", dragonVoice: "", question: "",
+    endConfig: { message: "O Dragão preparou um cupom pra você dar o primeiro passo. Sem risco.", couponCode: "PRIMEIRODRAGO", discountPercent: 20, ctaLabel: "CONHECER OS PRODUTOS", ctaUrl: LOJA_URL },
+  },
+  end_nottried_preco: {
+    id: "end_nottried_preco", type: "end", dragonVoice: "", question: "",
+    endConfig: { message: "O Dragão entende. Aqui vai o maior cupom pra primeira compra.", couponCode: "PRIMEIRODRAGO", discountPercent: 20, ctaLabel: "VER PRODUTOS COM DESCONTO", ctaUrl: LOJA_URL },
+  },
+  end_nottried_barreira: {
+    id: "end_nottried_barreira", type: "end", dragonVoice: "", question: "",
+    endConfig: { message: "O Dragão ouviu. Sua opinião vai ajudar a derrubar barreiras. Aqui vai um presente.", couponCode: "PRIMEIRODRAGO", discountPercent: 20, ctaLabel: "EXPERIMENTAR AGORA", ctaUrl: LOJA_URL },
+  },
+  end_nottried_novo: {
+    id: "end_nottried_novo", type: "end", dragonVoice: "", question: "",
+    endConfig: { message: "Bem-vindo à revolução. Esse cupom é pra você começar.", couponCode: "DESCOBERTA", discountPercent: 15, ctaLabel: "CONHECER OS PRODUTOS", ctaUrl: LOJA_URL },
+  },
+  end_nottried_outro: {
+    id: "end_nottried_outro", type: "end", dragonVoice: "", question: "",
+    endConfig: { message: "O Dragão ouviu. Sua opinião ajuda a gente a melhorar.", couponCode: "PRIMEIRODRAGO", discountPercent: 20, ctaLabel: "EXPERIMENTAR AGORA", ctaUrl: LOJA_URL, hasTextField: true, textFieldPlaceholder: "Quer contar o que te impediu? (opcional)" },
+  },
+  end_nottried_nao: {
+    id: "end_nottried_nao", type: "end", dragonVoice: "", question: "",
+    endConfig: { message: "Tudo bem. Quando a curiosidade bater, o Dragão tá aqui.", ctaLabel: "VER LOJA", ctaUrl: LOJA_URL },
+  },
 
   // ════════════════════════════════════════════════════════════════════════════
   // FLUXO ACTIVE — até 5 perguntas com profundidade real
@@ -398,9 +489,13 @@ const STEPS: Record<string, SurveyStep> = {
 
 // ─── HELPERS ───────────────────────────────────────────────────────────────────
 
-function resolveNextStep(stepId: string, answer: "yes" | "no", segment: Segment): string {
+function resolveNextStep(stepId: string, answer: "yes" | "no", segment: Segment, churn: ChurnStatus): string {
   const step = STEPS[stepId];
   const raw  = answer === "yes" ? step.onYes : step.onNo;
+  // Gate: SIM → vai pro fluxo do churn status
+  if (raw === "__churn_entry__") {
+    return CHURN_ENTRY[churn] || "active_q1";
+  }
   // Q3 do fluxo active: depende do segmento do cliente
   if (raw === "active_q3") {
     return segment === "fiel" || segment === "vip" ? "active_q3_fiel" : "active_q3_nova";
@@ -488,7 +583,7 @@ export const FeedbackSurvey = () => {
   const handleYesNo = (answer: "yes" | "no") => {
     setSelected(answer);
     setTimeout(() => {
-      const next = resolveNextStep(currentId, answer, segment);
+      const next = resolveNextStep(currentId, answer, segment, churn);
       if (!next) return;
       setHistory((h) => [...h, currentId]);
       setCurrentId(next);
