@@ -30,6 +30,7 @@ export type Database = {
           pet_acceptance: string
           pet_type: string
           pet_type_other: string | null
+          phone: string | null
           rejection_action: string | null
           usage_time: string
           would_change: string
@@ -50,6 +51,7 @@ export type Database = {
           pet_acceptance: string
           pet_type: string
           pet_type_other?: string | null
+          phone?: string | null
           rejection_action?: string | null
           usage_time: string
           would_change: string
@@ -70,6 +72,7 @@ export type Database = {
           pet_acceptance?: string
           pet_type?: string
           pet_type_other?: string | null
+          phone?: string | null
           rejection_action?: string | null
           usage_time?: string
           would_change?: string
