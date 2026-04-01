@@ -12,17 +12,44 @@ interface Question {
   options: { value: string; label: string }[];
 }
 
-const questions: Question[] = [
+// ── Pergunta 0: gate "já experimentou?" ──────────────────────────────────────
+const gateQuestion: Question = {
+  id: 0,
+  question: "Você já experimentou Comida de Dragão?",
+  options: [
+    { value: "A", label: "A) ✅ Sim, já experimentei!" },
+    { value: "B", label: "B) 👀 Ainda não, mas tenho curiosidade" },
+    { value: "C", label: "C) 🤔 Ouvi falar mas nunca comprei" },
+    { value: "D", label: "D) ❌ Não conheço ainda" },
+  ],
+};
+
+// ── Sub-perguntas para quem respondeu NÃO (B, C ou D) ───────────────────────
+const noFollowUpQuestions: Question[] = [
   {
-    id: 0,
-    question: "Você já provou Comida de Dragão?",
+    id: 100,
+    question: "O que te impede de experimentar?",
     options: [
-      { value: "A", label: "A) ✅ Sim, já experimentei!" },
-      { value: "B", label: "B) 👀 Ainda não, mas tenho curiosidade" },
-      { value: "C", label: "C) 🤔 Ouvi falar mas nunca comprei" },
-      { value: "D", label: "D) ❌ Não conheço ainda" },
+      { value: "A", label: "A) 💰 Preço — parece caro pra testar" },
+      { value: "B", label: "B) 🤢 Barreira psicológica — insetos são estranhos pra mim" },
+      { value: "C", label: "C) 🤷 Falta de informação — não sei como funciona" },
+      { value: "D", label: "D) 🐾 Meu pet é exigente — tenho medo dele rejeitar" },
     ],
   },
+  {
+    id: 101,
+    question: "Qual é o seu pet?",
+    options: [
+      { value: "A", label: "A) 🐕 Cachorro" },
+      { value: "B", label: "B) 🐈 Gato" },
+      { value: "C", label: "C) 🦎 Réptil ou Anfíbio (gecko, pogona, rã, etc.)" },
+      { value: "D", label: "D) 🐦 Ave, peixe ou outro pequeno mamífero" },
+    ],
+  },
+];
+
+// ── Perguntas principais do quiz (quem respondeu SIM) ────────────────────────
+const mainQuestions: Question[] = [
   {
     id: 1,
     question: "Qual é o seu pet?",
@@ -95,32 +122,101 @@ const questions: Question[] = [
   },
 ];
 
+type QuizPhase = "gate" | "main" | "no_followup" | "no_end";
+
 export const Quiz = () => {
   const navigate = useNavigate();
   const [quizStarted, setQuizStarted] = useState(false);
-  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [phase, setPhase] = useState<QuizPhase>("gate");
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string>>({});
 
+  // Retorna as perguntas do fluxo atual
+  const getActiveQuestions = (): Question[] => {
+    if (phase === "gate") return [gateQuestion];
+    if (phase === "no_followup") return noFollowUpQuestions;
+    if (phase === "main") return mainQuestions;
+    return [];
+  };
+
+  const activeQuestions = getActiveQuestions();
+  const currentQuestion = activeQuestions[currentIndex];
+
+  // Total de passos visível para o usuário
+  const getTotalSteps = () => {
+    if (phase === "gate") return 1 + mainQuestions.length; // estimativa otimista
+    if (phase === "no_followup") return 1 + noFollowUpQuestions.length;
+    if (phase === "main") return 1 + mainQuestions.length;
+    return 1;
+  };
+
+  const getCurrentStep = () => {
+    if (phase === "gate") return 1;
+    if (phase === "no_followup") return 1 + currentIndex + 1;
+    if (phase === "main") return 1 + currentIndex + 1;
+    return 1;
+  };
+
   const handleAnswer = (value: string) => {
+    if (!currentQuestion) return;
     setAnswers((prev) => ({
       ...prev,
-      [questions[currentQuestion].id]: value,
+      [currentQuestion.id]: value,
     }));
   };
 
   const handleNext = () => {
-    if (currentQuestion < questions.length - 1) {
-      setCurrentQuestion((prev) => prev + 1);
-    } else {
-      // Quiz completed - navigate to results
-      localStorage.setItem("quizAnswers", JSON.stringify(answers));
-      navigate("/results", { state: { answers } });
+    if (!currentQuestion) return;
+    const answer = answers[currentQuestion.id];
+
+    // ── Gate: decidir o fluxo ─────────────────────────────────────────────
+    if (phase === "gate") {
+      if (answer === "A") {
+        // Sim, já experimentou → quiz principal
+        setPhase("main");
+        setCurrentIndex(0);
+      } else {
+        // B, C ou D → fluxo "não experimentou"
+        setPhase("no_followup");
+        setCurrentIndex(0);
+      }
+      return;
+    }
+
+    // ── Follow-up do NÃO ─────────────────────────────────────────────────
+    if (phase === "no_followup") {
+      if (currentIndex < noFollowUpQuestions.length - 1) {
+        setCurrentIndex((prev) => prev + 1);
+      } else {
+        // Fim do fluxo "não experimentou" → resultado especial
+        localStorage.setItem("quizAnswers", JSON.stringify(answers));
+        navigate("/quiz-result", { state: { answers, triedBefore: false } });
+      }
+      return;
+    }
+
+    // ── Quiz principal ───────────────────────────────────────────────────
+    if (phase === "main") {
+      if (currentIndex < mainQuestions.length - 1) {
+        setCurrentIndex((prev) => prev + 1);
+      } else {
+        // Quiz completo → resultado com recomendação de produto
+        localStorage.setItem("quizAnswers", JSON.stringify(answers));
+        navigate("/quiz-result", { state: { answers, triedBefore: true } });
+      }
+      return;
     }
   };
 
   const handleBack = () => {
-    if (currentQuestion > 0) {
-      setCurrentQuestion((prev) => prev - 1);
+    if (currentIndex > 0) {
+      setCurrentIndex((prev) => prev - 1);
+      return;
+    }
+    // Voltou pro início do fluxo → volta pro gate
+    if (phase === "main" || phase === "no_followup") {
+      setPhase("gate");
+      setCurrentIndex(0);
     }
   };
 
@@ -128,9 +224,14 @@ export const Quiz = () => {
     setQuizStarted(true);
   };
 
-  const currentAnswer = answers[questions[currentQuestion].id] || "";
+  const currentAnswer = currentQuestion ? (answers[currentQuestion.id] || "") : "";
   const canProceed = currentAnswer.trim().length > 0;
+  const showBack = phase !== "gate" || currentIndex > 0;
+  const isLastQuestion =
+    (phase === "main" && currentIndex === mainQuestions.length - 1) ||
+    (phase === "no_followup" && currentIndex === noFollowUpQuestions.length - 1);
 
+  // ── Tela inicial ───────────────────────────────────────────────────────────
   if (!quizStarted) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
@@ -162,14 +263,17 @@ export const Quiz = () => {
     );
   }
 
+  if (!currentQuestion) return null;
+
+  // ── Quiz ativo ─────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
       <div className="w-full max-w-4xl">
-        <ProgressBar current={currentQuestion + 1} total={questions.length} />
-        
+        <ProgressBar current={getCurrentStep()} total={getTotalSteps()} />
+
         <QuizMultipleChoice
-          question={questions[currentQuestion].question}
-          options={questions[currentQuestion].options}
+          question={currentQuestion.question}
+          options={currentQuestion.options}
           selectedValue={currentAnswer}
           onChange={handleAnswer}
         />
@@ -177,8 +281,8 @@ export const Quiz = () => {
         <QuizNavigation
           onBack={handleBack}
           onNext={handleNext}
-          showBack={currentQuestion > 0}
-          isLastQuestion={currentQuestion === questions.length - 1}
+          showBack={showBack}
+          isLastQuestion={isLastQuestion}
           canProceed={canProceed}
         />
       </div>
