@@ -566,6 +566,7 @@ export const FeedbackSurvey = () => {
   const [phone, setPhone]               = useState("");
   const [phoneCollected, setPhoneCollected] = useState(false);
   const [phoneError, setPhoneError]     = useState("");
+  const [saved, setSaved]               = useState(false);
 
   const step        = STEPS[currentId] ?? null;
   const displayName = customerName.split(" ")[0];
