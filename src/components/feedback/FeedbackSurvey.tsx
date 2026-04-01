@@ -921,12 +921,12 @@ export const FeedbackSurvey = () => {
           )}
 
           <button
-            onClick={() => handleSubmit(cfg.ctaUrl !== LOJA_URL ? cfg.ctaUrl : undefined)}
-            disabled={isSubmitting}
-            className="w-full py-5 bg-primary text-primary-foreground font-black uppercase tracking-wider text-xl hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50"
+            onClick={() => handleCtaClick(cfg.ctaUrl)}
+            className="w-full py-5 bg-primary text-primary-foreground font-black uppercase tracking-wider text-xl hover:opacity-90 active:scale-[0.98] transition-all"
             style={{ fontFamily: "'Big Shoulders Display', sans-serif" }}
           >
-            {isSubmitting ? "ENVIANDO..." : cfg.ctaLabel + " →"}
+            {cfg.ctaLabel} →
+          </button>
           </button>
 
           <p className="text-center text-xs font-special text-muted-foreground mt-6">
