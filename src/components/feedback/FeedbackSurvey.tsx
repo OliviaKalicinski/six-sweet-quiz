@@ -101,23 +101,23 @@ const STEPS: Record<string, SurveyStep> = {
 
   end_nottried_curioso: {
     id: "end_nottried_curioso", type: "end", dragonVoice: "", question: "",
-    endConfig: { message: "O Dragão preparou um cupom pra você dar o primeiro passo. Sem risco.", couponCode: "PRIMEIRODRAGO", discountPercent: 20, ctaLabel: "CONHECER OS PRODUTOS", ctaUrl: LOJA_URL },
+    endConfig: { message: "O Dragão preparou um cupom pra você dar o primeiro passo. Sem risco.", couponCode: "FALOUEDISSE", discountPercent: 15, ctaLabel: "CONHECER OS PRODUTOS", ctaUrl: LOJA_URL },
   },
   end_nottried_preco: {
     id: "end_nottried_preco", type: "end", dragonVoice: "", question: "",
-    endConfig: { message: "O Dragão entende. Aqui vai o maior cupom pra primeira compra.", couponCode: "PRIMEIRODRAGO", discountPercent: 20, ctaLabel: "VER PRODUTOS COM DESCONTO", ctaUrl: LOJA_URL },
+    endConfig: { message: "O Dragão entende. Aqui vai o maior cupom pra primeira compra.", couponCode: "FALOUEDISSE", discountPercent: 15, ctaLabel: "VER PRODUTOS COM DESCONTO", ctaUrl: LOJA_URL },
   },
   end_nottried_barreira: {
     id: "end_nottried_barreira", type: "end", dragonVoice: "", question: "",
-    endConfig: { message: "O Dragão ouviu. Sua opinião vai ajudar a derrubar barreiras. Aqui vai um presente.", couponCode: "PRIMEIRODRAGO", discountPercent: 20, ctaLabel: "EXPERIMENTAR AGORA", ctaUrl: LOJA_URL },
+    endConfig: { message: "O Dragão ouviu. Sua opinião vai ajudar a derrubar barreiras. Aqui vai um presente.", couponCode: "FALOUEDISSE", discountPercent: 15, ctaLabel: "EXPERIMENTAR AGORA", ctaUrl: LOJA_URL },
   },
   end_nottried_novo: {
     id: "end_nottried_novo", type: "end", dragonVoice: "", question: "",
-    endConfig: { message: "Bem-vindo à revolução. Esse cupom é pra você começar.", couponCode: "DESCOBERTA", discountPercent: 15, ctaLabel: "CONHECER OS PRODUTOS", ctaUrl: LOJA_URL },
+    endConfig: { message: "Bem-vindo à revolução. Esse cupom é pra você começar.", couponCode: "FALOUEDISSE", discountPercent: 15, ctaLabel: "CONHECER OS PRODUTOS", ctaUrl: LOJA_URL },
   },
   end_nottried_outro: {
     id: "end_nottried_outro", type: "end", dragonVoice: "", question: "",
-    endConfig: { message: "O Dragão ouviu. Sua opinião ajuda a gente a melhorar.", couponCode: "PRIMEIRODRAGO", discountPercent: 20, ctaLabel: "EXPERIMENTAR AGORA", ctaUrl: LOJA_URL, hasTextField: true, textFieldPlaceholder: "Quer contar o que te impediu? (opcional)" },
+    endConfig: { message: "O Dragão ouviu. Sua opinião ajuda a gente a melhorar.", couponCode: "FALOUEDISSE", discountPercent: 15, ctaLabel: "EXPERIMENTAR AGORA", ctaUrl: LOJA_URL, hasTextField: true, textFieldPlaceholder: "Quer contar o que te impediu? (opcional)" },
   },
   end_nottried_nao: {
     id: "end_nottried_nao", type: "end", dragonVoice: "", question: "",
@@ -378,15 +378,15 @@ const STEPS: Record<string, SurveyStep> = {
   },
   end_descoberta: {
     id: "end_descoberta", type: "end", dragonVoice: "", question: "",
-    endConfig: { message: "Tem muito que você ainda não viu. O Dragão preparou um cupom pra você explorar.", couponCode: "DESCOBERTA", discountPercent: 15, ctaLabel: "VER CATÁLOGO COMPLETO", ctaUrl: LOJA_URL },
+    endConfig: { message: "Tem muito que você ainda não viu. O Dragão preparou um cupom pra você explorar.", couponCode: "FALOUEDISSE", discountPercent: 15, ctaLabel: "VER CATÁLOGO COMPLETO", ctaUrl: LOJA_URL },
   },
   end_indica_compartilha: {
     id: "end_indica_compartilha", type: "end", dragonVoice: "", question: "",
-    endConfig: { message: "A revolução se espalha uma indicação de cada vez. Aqui vai um cupom pra você compartilhar com ela.", tip: "Manda esse código pra ela: INDICAFIEL — 20% na primeira compra.", couponCode: "INDICAFIEL", discountPercent: 20, ctaLabel: "VER LOJA", ctaUrl: LOJA_URL },
+    endConfig: { message: "A revolução se espalha uma indicação de cada vez. Aqui vai um cupom pra você compartilhar com ela.", tip: "Manda esse código pra ela: FALOUEDISSE — 15% na primeira compra.", couponCode: "FALOUEDISSE", discountPercent: 15, ctaLabel: "VER LOJA", ctaUrl: LOJA_URL },
   },
   end_indica_oport: {
     id: "end_indica_oport", type: "end", dragonVoice: "", question: "",
-    endConfig: { message: "Quando a oportunidade chegar, esse cupom é pra você dividir.", tip: "Guarda esse código: INDICAFIEL — 20% pra quem você indicar.", couponCode: "INDICAFIEL", discountPercent: 20, ctaLabel: "VER LOJA", ctaUrl: LOJA_URL },
+    endConfig: { message: "Quando a oportunidade chegar, esse cupom é pra você dividir.", tip: "Guarda esse código: FALOUEDISSE — 15% pra quem você indicar.", couponCode: "FALOUEDISSE", discountPercent: 15, ctaLabel: "VER LOJA", ctaUrl: LOJA_URL },
   },
 
   // ── Melhorias / Feedback ───────────────────────────────────────────────────
@@ -400,45 +400,45 @@ const STEPS: Record<string, SurveyStep> = {
   },
   end_how: {
     id: "end_how", type: "end", dragonVoice: "", question: "",
-    endConfig: { message: "Antes de desistir — esse truque funciona na maioria dos pets:", tip: "Misture 20% Comida de Dragão + 80% ração, por 5 dias seguidos. O olfato dele vai se acostumar.", couponCode: "TENTOUDRAGO", discountPercent: 20, ctaLabel: "TENTAR DE NOVO", ctaUrl: LOJA_URL },
+    endConfig: { message: "Antes de desistir — esse truque funciona na maioria dos pets:", tip: "Misture 20% Comida de Dragão + 80% ração, por 5 dias seguidos. O olfato dele vai se acostumar.", couponCode: "FALOUEDISSE", discountPercent: 15, ctaLabel: "TENTAR DE NOVO", ctaUrl: LOJA_URL },
   },
 
   // ── Preço ──────────────────────────────────────────────────────────────────
   end_price_compraria: {
     id: "end_price_compraria", type: "end", dragonVoice: "", question: "",
-    endConfig: { message: "O Dragão entende. Aqui vai o maior cupom que temos.", couponCode: "PRECODRAGO", discountPercent: 25, ctaLabel: "USAR CUPOM AGORA", ctaUrl: LOJA_URL },
+    endConfig: { message: "O Dragão entende. Aqui vai o maior cupom que temos.", couponCode: "FALOUEDISSE", discountPercent: 15, ctaLabel: "USAR CUPOM AGORA", ctaUrl: LOJA_URL },
   },
   end_price_at: {
     id: "end_price_at", type: "end", dragonVoice: "", question: "",
-    endConfig: { message: "O Dragão entende. Aqui vai um presente.", couponCode: "PRECODRAGO", discountPercent: 25, ctaLabel: "USAR CUPOM AGORA", ctaUrl: LOJA_URL },
+    endConfig: { message: "O Dragão entende. Aqui vai um presente.", couponCode: "FALOUEDISSE", discountPercent: 15, ctaLabel: "USAR CUPOM AGORA", ctaUrl: LOJA_URL },
   },
   end_price_in: {
     id: "end_price_in", type: "end", dragonVoice: "", question: "",
-    endConfig: { message: "O Dragão preparou uma oferta especial pra você voltar.", couponCode: "PRECODRAGO", discountPercent: 25, ctaLabel: "USAR CUPOM AGORA", ctaUrl: LOJA_URL },
+    endConfig: { message: "O Dragão preparou uma oferta especial pra você voltar.", couponCode: "FALOUEDISSE", discountPercent: 15, ctaLabel: "USAR CUPOM AGORA", ctaUrl: LOJA_URL },
   },
 
   // ── Reabastecimento ────────────────────────────────────────────────────────
   end_reab: {
     id: "end_reab", type: "end", dragonVoice: "", question: "",
-    endConfig: { message: "O Dragão reservou isso pra você. Sem deixar o estoque acabar de novo.", couponCode: "VOLTADRAGO", discountPercent: 20, ctaLabel: "REABASTECER AGORA", ctaUrl: LOJA_URL },
+    endConfig: { message: "O Dragão reservou isso pra você. Sem deixar o estoque acabar de novo.", couponCode: "FALOUEDISSE", discountPercent: 15, ctaLabel: "REABASTECER AGORA", ctaUrl: LOJA_URL },
   },
 
   // ── Problema produto / pet ─────────────────────────────────────────────────
   end_prod: {
     id: "end_prod", type: "end", dragonVoice: "", question: "",
-    endConfig: { message: "Registrei. O Dragão já foi avisado — chama no WhatsApp pra resolver.", couponCode: "VOLTADRAGO", discountPercent: 20, ctaLabel: "CHAMAR NO WHATSAPP", ctaUrl: WHATSAPP_URL, showWhatsApp: true },
+    endConfig: { message: "Registrei. O Dragão já foi avisado — chama no WhatsApp pra resolver.", couponCode: "FALOUEDISSE", discountPercent: 15, ctaLabel: "CHAMAR NO WHATSAPP", ctaUrl: WHATSAPP_URL, showWhatsApp: true },
   },
   end_pet: {
     id: "end_pet", type: "end", dragonVoice: "", question: "",
-    endConfig: { message: "O Dragão entende. Quando o pet estiver melhor, a gente tá aqui — sem pressão.", couponCode: "SEMPRESSA", discountPercent: 15, ctaLabel: "VER LOJA", ctaUrl: LOJA_URL },
+    endConfig: { message: "O Dragão entende. Quando o pet estiver melhor, a gente tá aqui — sem pressão.", couponCode: "FALOUEDISSE", discountPercent: 15, ctaLabel: "VER LOJA", ctaUrl: LOJA_URL },
   },
   end_empat: {
     id: "end_empat", type: "end", dragonVoice: "", question: "",
-    endConfig: { message: "Você fez o certo em tentar. Chama no WhatsApp — a gente ajuda a encontrar o jeito certo.", couponCode: "TENTOUDRAGO", discountPercent: 20, ctaLabel: "CHAMAR NO WHATSAPP", ctaUrl: WHATSAPP_URL, showWhatsApp: true },
+    endConfig: { message: "Você fez o certo em tentar. Chama no WhatsApp — a gente ajuda a encontrar o jeito certo.", couponCode: "FALOUEDISSE", discountPercent: 15, ctaLabel: "CHAMAR NO WHATSAPP", ctaUrl: WHATSAPP_URL, showWhatsApp: true },
   },
   end_trick: {
     id: "end_trick", type: "end", dragonVoice: "", question: "",
-    endConfig: { message: "Antes de desistir — esse truque funciona:", tip: "Misture 20% Comida de Dragão + 80% ração, por 5 dias seguidos. O olfato dele vai se acostumar.", couponCode: "TENTOUDRAGO", discountPercent: 20, ctaLabel: "TENTAR DE NOVO", ctaUrl: LOJA_URL },
+    endConfig: { message: "Antes de desistir — esse truque funciona:", tip: "Misture 20% Comida de Dragão + 80% ração, por 5 dias seguidos. O olfato dele vai se acostumar.", couponCode: "FALOUEDISSE", discountPercent: 15, ctaLabel: "TENTAR DE NOVO", ctaUrl: LOJA_URL },
   },
 
   // ── Com texto opcional ─────────────────────────────────────────────────────
@@ -448,21 +448,21 @@ const STEPS: Record<string, SurveyStep> = {
   },
   end_text: {
     id: "end_text", type: "end", dragonVoice: "", question: "",
-    endConfig: { message: "Obrigado pela honestidade. O Dragão leu tudo.", couponCode: "VOLTADRAGO", discountPercent: 20, ctaLabel: "VER LOJA", ctaUrl: LOJA_URL, hasTextField: true, textFieldPlaceholder: "O que poderia ter sido diferente? (opcional)" },
+    endConfig: { message: "Obrigado pela honestidade. O Dragão leu tudo.", couponCode: "FALOUEDISSE", discountPercent: 15, ctaLabel: "VER LOJA", ctaUrl: LOJA_URL, hasTextField: true, textFieldPlaceholder: "O que poderia ter sido diferente? (opcional)" },
   },
   end_text_c: {
     id: "end_text_c", type: "end", dragonVoice: "", question: "",
-    endConfig: { message: "O Dragão ouviu. Sua opinião vai guiar os próximos passos.", couponCode: "VOLTADRAGO", discountPercent: 20, ctaLabel: "VER LOJA", ctaUrl: LOJA_URL, hasTextField: true, textFieldPlaceholder: "O que precisaria mudar? (opcional)" },
+    endConfig: { message: "O Dragão ouviu. Sua opinião vai guiar os próximos passos.", couponCode: "FALOUEDISSE", discountPercent: 15, ctaLabel: "VER LOJA", ctaUrl: LOJA_URL, hasTextField: true, textFieldPlaceholder: "O que precisaria mudar? (opcional)" },
   },
 
   // ── Churned win-back ───────────────────────────────────────────────────────
   end_winback: {
     id: "end_winback", type: "end", dragonVoice: "", question: "",
-    endConfig: { message: "Esse cupom é pra provar que vale a pena voltar. O Dragão apostou em você.", couponCode: "SUMIU", discountPercent: 30, ctaLabel: "VOLTAR PRA LOJA", ctaUrl: LOJA_URL },
+    endConfig: { message: "Esse cupom é pra provar que vale a pena voltar. O Dragão apostou em você.", couponCode: "FALOUEDISSE", discountPercent: 15, ctaLabel: "VOLTAR PRA LOJA", ctaUrl: LOJA_URL },
   },
   end_novid: {
     id: "end_novid", type: "end", dragonVoice: "", question: "",
-    endConfig: { message: "O Dragão tem segredos. Fica atento — novidades chegando.", couponCode: "NOVIDADES", discountPercent: 15, ctaLabel: "VER O QUE TEM DE NOVO", ctaUrl: LOJA_URL },
+    endConfig: { message: "O Dragão tem segredos. Fica atento — novidades chegando.", couponCode: "FALOUEDISSE", discountPercent: 15, ctaLabel: "VER O QUE TEM DE NOVO", ctaUrl: LOJA_URL },
   },
   end_ok: {
     id: "end_ok", type: "end", dragonVoice: "", question: "",
@@ -472,15 +472,15 @@ const STEPS: Record<string, SurveyStep> = {
   // ── Lead ───────────────────────────────────────────────────────────────────
   end_lead_pos: {
     id: "end_lead_pos", type: "end", dragonVoice: "", question: "",
-    endConfig: { message: "Esse cupom é pra primeira experiência — o Dragão confia que vai valer a pena.", couponCode: "PRIMEIRODRAGO", discountPercent: 20, ctaLabel: "FAZER PRIMEIRA COMPRA", ctaUrl: LOJA_URL },
+    endConfig: { message: "Esse cupom é pra primeira experiência — o Dragão confia que vai valer a pena.", couponCode: "FALOUEDISSE", discountPercent: 15, ctaLabel: "FAZER PRIMEIRA COMPRA", ctaUrl: LOJA_URL },
   },
   end_lead_duv: {
     id: "end_lead_duv", type: "end", dragonVoice: "", question: "",
-    endConfig: { message: "Sua dúvida vai pro Dragão agora. E aqui vai um presente pra primeira vez.", couponCode: "PRIMEIRODRAGO", discountPercent: 20, ctaLabel: "CHAMAR NO WHATSAPP", ctaUrl: WHATSAPP_URL, showWhatsApp: true },
+    endConfig: { message: "Sua dúvida vai pro Dragão agora. E aqui vai um presente pra primeira vez.", couponCode: "FALOUEDISSE", discountPercent: 15, ctaLabel: "CHAMAR NO WHATSAPP", ctaUrl: WHATSAPP_URL, showWhatsApp: true },
   },
   end_lead_novo: {
     id: "end_lead_novo", type: "end", dragonVoice: "", question: "",
-    endConfig: { message: "Bem-vindo à revolução. Esse cupom é pra você começar.", couponCode: "DESCOBERTA", discountPercent: 15, ctaLabel: "CONHECER OS PRODUTOS", ctaUrl: LOJA_URL },
+    endConfig: { message: "Bem-vindo à revolução. Esse cupom é pra você começar.", couponCode: "FALOUEDISSE", discountPercent: 15, ctaLabel: "CONHECER OS PRODUTOS", ctaUrl: LOJA_URL },
   },
   end_lead_nao: {
     id: "end_lead_nao", type: "end", dragonVoice: "", question: "",
