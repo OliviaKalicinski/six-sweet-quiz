@@ -927,7 +927,6 @@ export const FeedbackSurvey = () => {
           >
             {cfg.ctaLabel} →
           </button>
-          </button>
 
           <p className="text-center text-xs font-special text-muted-foreground mt-6">
             Precisou de ajuda?{" "}
