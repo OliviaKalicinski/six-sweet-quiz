@@ -514,14 +514,14 @@ export const FeedbackSurvey = () => {
   };
 
   // ── Submit ─────────────────────────────────────────────────────────────────
-  const handleSubmit = async () => {
+  const handleSubmit = async (externalUrl?: string) => {
     setIsSubmitting(true);
     try {
       await supabase.from("feedback_responses").insert({
         customer_name:        customerName,
         pet_type:             segment,
         usage_time:           churn,
-        nps_score:            null,
+        nps_score:            0,
         expectations:         "survey_v3",
         motivations:          [],
         liked_most:           JSON.stringify(textAnswers),
@@ -536,6 +536,7 @@ export const FeedbackSurvey = () => {
         pathTaken: [...history, currentId],
         textAnswers,
       }));
+      if (externalUrl) window.open(externalUrl, "_blank");
       navigate("/results");
     } catch {
       toast({ title: "Erro ao enviar", description: "Não foi possível enviar. Tente novamente.", variant: "destructive" });
@@ -679,7 +680,7 @@ export const FeedbackSurvey = () => {
           )}
 
           <button
-            onClick={handleSubmit}
+            onClick={() => handleSubmit(cfg.ctaUrl !== LOJA_URL ? cfg.ctaUrl : undefined)}
             disabled={isSubmitting}
             className="w-full py-5 bg-primary text-primary-foreground font-black uppercase tracking-wider text-xl hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50"
             style={{ fontFamily: "'Big Shoulders Display', sans-serif" }}
