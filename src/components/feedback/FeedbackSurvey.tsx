@@ -645,6 +645,7 @@ export const FeedbackSurvey = () => {
     try {
       await supabase.from("feedback_responses").insert({
         customer_name:        customerName,
+        phone:                phone || null,
         pet_type:             segment,
         usage_time:           churn,
         nps_score:            0,
