@@ -30,12 +30,13 @@ const ENTRY_STEPS: Record<ChurnStatus, string> = {
 };
 
 // Após o gate, quem respondeu SIM vai pro fluxo original do churn
+// Lead redireciona pro Active (se já experimentou, não faz sentido perguntar "já conhece?")
 const CHURN_ENTRY: Record<ChurnStatus, string> = {
   active:   "active_q1",
   at_risk:  "risk_q1",
   inactive: "inactive_q1",
   churned:  "churned_q1",
-  lead:     "lead_q1",
+  lead:     "active_q1",
 };
 
 // ─── ALL SURVEY STEPS ──────────────────────────────────────────────────────────
