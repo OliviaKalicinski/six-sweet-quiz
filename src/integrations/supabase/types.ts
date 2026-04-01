@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       feedback_responses: {
         Row: {
+          churn_status: string | null
           created_at: string
           customer_name: string
           expectations: string
@@ -32,11 +33,14 @@ export type Database = {
           pet_type_other: string | null
           phone: string | null
           rejection_action: string | null
+          segment: string | null
+          survey_version: string | null
           usage_time: string
           would_change: string
           would_repurchase: string
         }
         Insert: {
+          churn_status?: string | null
           created_at?: string
           customer_name?: string
           expectations: string
@@ -53,11 +57,14 @@ export type Database = {
           pet_type_other?: string | null
           phone?: string | null
           rejection_action?: string | null
+          segment?: string | null
+          survey_version?: string | null
           usage_time: string
           would_change: string
           would_repurchase: string
         }
         Update: {
+          churn_status?: string | null
           created_at?: string
           customer_name?: string
           expectations?: string
@@ -74,6 +81,8 @@ export type Database = {
           pet_type_other?: string | null
           phone?: string | null
           rejection_action?: string | null
+          segment?: string | null
+          survey_version?: string | null
           usage_time?: string
           would_change?: string
           would_repurchase?: string

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Textarea } from "@/components/ui/textarea";
 import { ProgressBar } from "@/components/ProgressBar";
@@ -562,10 +562,11 @@ export const FeedbackSurvey = () => {
   const [selected, setSelected]         = useState<"yes" | "no" | null>(null);
   const [textAnswers, setTextAnswers]   = useState<Record<string, string>>({});
   const [endTextField, setEndTextField] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  
   const [phone, setPhone]               = useState("");
   const [phoneCollected, setPhoneCollected] = useState(false);
   const [phoneError, setPhoneError]     = useState("");
+  const [saved, setSaved]               = useState(false);
 
   const step        = STEPS[currentId] ?? null;
   const displayName = customerName.split(" ")[0];
@@ -639,38 +640,69 @@ export const FeedbackSurvey = () => {
     setSelected(null);
   };
 
-  // ── Submit ─────────────────────────────────────────────────────────────────
-  const handleSubmit = async (externalUrl?: string) => {
-    setIsSubmitting(true);
-    try {
-      await supabase.from("feedback_responses").insert({
-        customer_name:        customerName,
-        phone:                phone || null,
-        pet_type:             segment,
-        usage_time:           churn,
-        nps_score:            0,
-        expectations:         "survey_v3",
-        motivations:          [],
-        liked_most:           JSON.stringify(textAnswers),
-        would_change:         endTextField || "",
-        pet_acceptance:       "survey_v3",
-        would_repurchase:     "survey_v3",
-        no_repurchase_reason: null,
-        ideal_product:        null,
+  // ── Auto-save when reaching end state ──────────────────────────────────────
+  const savingRef = useRef(false);
+
+  useEffect(() => {
+    if (step?.type !== "end" || saved || savingRef.current) return;
+    savingRef.current = true;
+
+    const doSave = async () => {
+      try {
+        const { error } = await supabase.from("feedback_responses").insert({
+          customer_name:        customerName,
+          phone:                phone || null,
+          pet_type:             segment,
+          usage_time:           churn,
+          nps_score:            0,
+          expectations:         "survey_v3",
+          motivations:          [],
+          liked_most:           JSON.stringify(textAnswers),
+          would_change:         endTextField || "",
+          pet_acceptance:       "survey_v3",
+          would_repurchase:     "survey_v3",
+          no_repurchase_reason: null,
+          ideal_product:        null,
+        });
+        if (error) {
+          console.error("Supabase insert error:", error);
+          toast({ title: "Erro ao salvar", description: "Tente novamente mais tarde.", variant: "destructive" });
+          savingRef.current = false;
+          return;
+        }
+        setSaved(true);
+        localStorage.setItem("feedbackSubmitted", JSON.stringify({ timestamp: Date.now() }));
+        localStorage.setItem("feedbackAnswers", JSON.stringify({
+          customerName, segment, churn,
+          pathTaken: [...history, currentId],
+          textAnswers,
+          phone: phone || "",
+        }));
+      } catch {
+        toast({ title: "Erro ao enviar", description: "Não foi possível enviar. Tente novamente.", variant: "destructive" });
+        savingRef.current = false;
+      }
+    };
+    doSave();
+  }, [step?.type, saved]);
+
+  // ── Update phone in DB after phone collection ─────────────────────────────
+  useEffect(() => {
+    if (!phoneCollected || !phone || !saved) return;
+    supabase.from("feedback_responses")
+      .update({ phone })
+      .eq("customer_name", customerName)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .then(({ error }) => {
+        if (error) console.error("Phone update error:", error);
       });
-      localStorage.setItem("feedbackAnswers", JSON.stringify({
-        customerName, segment, churn,
-        pathTaken: [...history, currentId],
-        textAnswers,
-        phone: phone || "",
-      }));
-      if (externalUrl) window.open(externalUrl, "_blank");
-      navigate("/results");
-    } catch {
-      toast({ title: "Erro ao enviar", description: "Não foi possível enviar. Tente novamente.", variant: "destructive" });
-    } finally {
-      setIsSubmitting(false);
-    }
+  }, [phoneCollected]);
+
+  // ── CTA click (just opens URL, data already saved) ────────────────────────
+  const handleCtaClick = (url?: string) => {
+    if (url) window.open(url, "_blank");
+    navigate("/results");
   };
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -889,12 +921,11 @@ export const FeedbackSurvey = () => {
           )}
 
           <button
-            onClick={() => handleSubmit(cfg.ctaUrl !== LOJA_URL ? cfg.ctaUrl : undefined)}
-            disabled={isSubmitting}
-            className="w-full py-5 bg-primary text-primary-foreground font-black uppercase tracking-wider text-xl hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50"
+            onClick={() => handleCtaClick(cfg.ctaUrl)}
+            className="w-full py-5 bg-primary text-primary-foreground font-black uppercase tracking-wider text-xl hover:opacity-90 active:scale-[0.98] transition-all"
             style={{ fontFamily: "'Big Shoulders Display', sans-serif" }}
           >
-            {isSubmitting ? "ENVIANDO..." : cfg.ctaLabel + " →"}
+            {cfg.ctaLabel} →
           </button>
 
           <p className="text-center text-xs font-special text-muted-foreground mt-6">
