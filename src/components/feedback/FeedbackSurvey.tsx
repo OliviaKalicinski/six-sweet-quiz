@@ -562,7 +562,7 @@ export const FeedbackSurvey = () => {
   const [selected, setSelected]         = useState<"yes" | "no" | null>(null);
   const [textAnswers, setTextAnswers]   = useState<Record<string, string>>({});
   const [endTextField, setEndTextField] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  
   const [phone, setPhone]               = useState("");
   const [phoneCollected, setPhoneCollected] = useState(false);
   const [phoneError, setPhoneError]     = useState("");
