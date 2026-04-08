@@ -32,7 +32,7 @@ interface FeedbackResponse {
   survey_version: string | null;
   phone: string | null;
   survey_path: string[] | null;
-  survey_answers: Record<string, string> | null;
+  survey_answers: Record<string, unknown> | null;
   end_state: string | null;
 }
 
