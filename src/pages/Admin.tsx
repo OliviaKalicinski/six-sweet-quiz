@@ -85,8 +85,9 @@ const Admin = () => {
 
       if (error) throw error;
 
-      setResponses(data || []);
-      calculateStats(data || []);
+      const typed = (data || []) as unknown as FeedbackResponse[];
+      setResponses(typed);
+      calculateStats(typed);
     } catch (error) {
       console.error("Error fetching responses:", error);
       toast({
