@@ -11,6 +11,7 @@ import { ptBR } from "date-fns/locale";
 interface FeedbackResponse {
   id: string;
   created_at: string;
+  customer_name: string;
   pet_type: string;
   pet_type_other: string | null;
   usage_time: string;
@@ -26,6 +27,13 @@ interface FeedbackResponse {
   would_repurchase: string;
   no_repurchase_reason: string | null;
   ideal_product: string | null;
+  segment: string | null;
+  churn_status: string | null;
+  survey_version: string | null;
+  phone: string | null;
+  survey_path: string[] | null;
+  survey_answers: Record<string, string> | null;
+  end_state: string | null;
 }
 
 const petTypeLabels: Record<string, string> = {
