@@ -656,7 +656,11 @@ export const FeedbackSurvey = () => {
           end_text: endTextField || "",
         };
 
-        const { data: insertData, error } = await supabase.from("feedback_responses").insert({
+        const generatedId = crypto.randomUUID();
+        savedIdRef.current = generatedId;
+
+        const { error } = await supabase.from("feedback_responses").insert({
+          id:                   generatedId,
           customer_name:        customerName,
           phone:                null,
           pet_type:             segment,
@@ -674,14 +678,14 @@ export const FeedbackSurvey = () => {
           survey_path:          surveyPath,
           survey_answers:       surveyAnswersData,
           end_state:            currentId,
-        }).select("id").single();
+        });
         if (error) {
           console.error("Supabase insert error:", error);
           toast({ title: "Erro ao salvar", description: "Tente novamente mais tarde.", variant: "destructive" });
           savingRef.current = false;
+          savedIdRef.current = null;
           return;
         }
-        savedIdRef.current = insertData?.id ?? null;
         setSaved(true);
         localStorage.setItem("feedbackSubmitted", JSON.stringify({ timestamp: Date.now() }));
         localStorage.setItem("feedbackAnswers", JSON.stringify({
