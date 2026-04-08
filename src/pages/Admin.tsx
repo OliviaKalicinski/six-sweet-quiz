@@ -191,18 +191,20 @@ const Admin = () => {
             <p className="text-3xl font-bold text-foreground">{stats.total}</p>
           </Card>
           <Card className="p-4 bg-card border-2 border-border">
-            <p className="text-sm text-muted-foreground font-special">Média NPS</p>
-            <p className="text-3xl font-bold text-foreground">{stats.avgNps.toFixed(1)}</p>
+            <p className="text-sm text-muted-foreground font-special">Total de Respostas</p>
+            <p className="text-3xl font-bold text-foreground">{stats.total}</p>
           </Card>
           <Card className="p-4 bg-card border-2 border-border">
-            <p className="text-sm text-muted-foreground font-special">NPS Score</p>
-            <p className={`text-3xl font-bold ${npsScore >= 50 ? "text-green-600" : npsScore >= 0 ? "text-yellow-600" : "text-red-600"}`}>
-              {npsScore}%
+            <p className="text-sm text-muted-foreground font-special">v4 (novo formato)</p>
+            <p className="text-3xl font-bold text-foreground">
+              {responses.filter(r => r.survey_version === "v4").length}
             </p>
           </Card>
           <Card className="p-4 bg-card border-2 border-border">
-            <p className="text-sm text-muted-foreground font-special">Promotores</p>
-            <p className="text-3xl font-bold text-foreground">{stats.promoters}</p>
+            <p className="text-sm text-muted-foreground font-special">Com telefone</p>
+            <p className="text-3xl font-bold text-foreground">
+              {responses.filter(r => r.phone && r.phone.trim()).length}
+            </p>
           </Card>
         </div>
 
