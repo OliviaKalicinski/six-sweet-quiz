@@ -121,37 +121,31 @@ const Admin = () => {
 
     const headers = [
       "Data",
-      "Tipo de Pet",
-      "Tempo de Uso",
-      "NPS",
-      "Expectativas",
-      "Razão Expectativas",
-      "Motivações",
-      "O que mais gostou",
-      "O que mudaria",
-      "Aceitação do Pet",
-      "Compraria novamente",
-      "Produto ideal",
+      "Nome",
+      "Segmento",
+      "Churn Status",
+      "Versão",
+      "End State",
+      "Telefone",
+      "Caminho",
+      "Respostas",
     ];
 
     const rows = responses.map((r) => [
       format(new Date(r.created_at), "dd/MM/yyyy HH:mm"),
-      petTypeLabels[r.pet_type] || r.pet_type_other || r.pet_type,
-      usageTimeLabels[r.usage_time] || r.usage_time,
-      r.nps_score,
-      r.expectations,
-      r.expectations_reason || "",
-      r.motivations.join(", "),
-      r.liked_most,
-      r.would_change,
-      r.pet_acceptance,
-      r.would_repurchase,
-      r.ideal_product || "",
+      r.customer_name || "",
+      r.segment || "",
+      r.churn_status || "",
+      r.survey_version || "",
+      r.end_state || "",
+      r.phone || "",
+      r.survey_path ? r.survey_path.join(" → ") : "",
+      r.survey_answers ? JSON.stringify(r.survey_answers) : r.liked_most || "",
     ]);
 
     const csvContent = [
       headers.join(";"),
-      ...rows.map((row) => row.map((cell) => `"${cell}"`).join(";")),
+      ...rows.map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(";")),
     ].join("\n");
 
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
