@@ -641,7 +641,8 @@ export const FeedbackSurvey = () => {
   };
 
   // ── Auto-save when reaching end state ──────────────────────────────────────
-  const savingRef = useRef(false);
+  const savingRef  = useRef(false);
+  const savedIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (step?.type !== "end" || saved || savingRef.current) return;
@@ -655,9 +656,9 @@ export const FeedbackSurvey = () => {
           end_text: endTextField || "",
         };
 
-        const { error } = await supabase.from("feedback_responses").insert({
+        const { data: insertData, error } = await supabase.from("feedback_responses").insert({
           customer_name:        customerName,
-          phone:                phone || null,
+          phone:                null,
           pet_type:             segment,
           usage_time:           churn,
           segment:              segment,
@@ -673,13 +674,14 @@ export const FeedbackSurvey = () => {
           survey_path:          surveyPath,
           survey_answers:       surveyAnswersData,
           end_state:            currentId,
-        });
+        }).select("id").single();
         if (error) {
           console.error("Supabase insert error:", error);
           toast({ title: "Erro ao salvar", description: "Tente novamente mais tarde.", variant: "destructive" });
           savingRef.current = false;
           return;
         }
+        savedIdRef.current = insertData?.id ?? null;
         setSaved(true);
         localStorage.setItem("feedbackSubmitted", JSON.stringify({ timestamp: Date.now() }));
         localStorage.setItem("feedbackAnswers", JSON.stringify({
@@ -698,19 +700,26 @@ export const FeedbackSurvey = () => {
 
   // ── Update phone in DB after phone collection ─────────────────────────────
   useEffect(() => {
-    if (!phoneCollected || !phone || !saved) return;
+    if (!phoneCollected || !phone || !saved || !savedIdRef.current) return;
     supabase.from("feedback_responses")
       .update({ phone })
-      .eq("customer_name", customerName)
-      .order("created_at", { ascending: false })
-      .limit(1)
+      .eq("id", savedIdRef.current)
       .then(({ error }) => {
         if (error) console.error("Phone update error:", error);
       });
   }, [phoneCollected]);
 
-  // ── CTA click (just opens URL, data already saved) ────────────────────────
+  // ── CTA click — atualiza endTextField se preenchido, depois navega ────────
   const handleCtaClick = (url?: string) => {
+    if (endTextField.trim() && savedIdRef.current) {
+      const updatedAnswers = { ...textAnswers, end_text: endTextField };
+      supabase.from("feedback_responses")
+        .update({ survey_answers: updatedAnswers })
+        .eq("id", savedIdRef.current)
+        .then(({ error }) => {
+          if (error) console.error("EndTextField update error:", error);
+        });
+    }
     if (url) window.open(url, "_blank");
     navigate("/results");
   };
