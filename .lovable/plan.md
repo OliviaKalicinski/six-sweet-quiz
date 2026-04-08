@@ -1,50 +1,34 @@
 
-Problema identificado: hoje a avaliação só é salva no último CTA da tela final, depois de uma etapa extra de telefone/cupom. Isso cria a sensação de que a resposta “não foi”, principalmente se a pessoa parar em “Quase lá” ou achar que já concluiu ao responder a última pergunta. Além disso, o código de envio não valida `error` retornado pelo banco, então uma falha de insert pode passar sem tratamento adequado.
 
-Plano de correção
+## Corrigir o mapeamento de dados do survey
 
-1. Ajustar o momento do salvamento
-- Salvar a resposta assim que o usuário chegar ao estado final do fluxo, antes da etapa opcional de telefone/cupom.
-- Manter a coleta de telefone e o botão da loja como pós-conclusão, sem depender disso para gravar a avaliação.
+### Problema
+O survey mudou de formulário linear (NPS, expectativas, etc.) para uma árvore de decisão sim/não, mas o código de salvamento continua usando as colunas antigas com valores fixos como `"survey_v3"` e `nps_score: 0`. As respostas de texto vão todas para `liked_most` como JSON, e o caminho percorrido não é salvo no banco.
 
-2. Corrigir o tratamento de erro do envio
-- Atualizar `handleSubmit` em `src/components/feedback/FeedbackSurvey.tsx` para capturar `{ error }` do insert e interromper o fluxo se houver falha real.
-- Exibir feedback visível quando o envio falhar.
+### Solução
 
-3. Evitar duplicidade e confusão no fluxo final
-- Separar claramente:
-  - conclusão da pesquisa
-  - tela opcional de WhatsApp/cupom
-  - ida para a loja
-- Garantir que clicar em “Pular” na etapa de telefone não impeça o registro.
+**1. Adicionar colunas para o novo formato**
+- `survey_path` (text[]): sequência de step IDs percorridos (ex: `["gate_tried","active_q1","active_q2"]`)
+- `survey_answers` (jsonb): respostas de texto e o end state alcançado (ex: `{"active_q3_pet_tentou":"misturei com ração","end_state":"end_dica","end_text":""}`)
+- `end_state` (text): ID do estado final atingido (ex: `"end_dica"`, `"end_pos"`)
 
-4. Revisar a página `/results`
-- Hoje ela tem uma segunda coleta de telefone independente, o que duplica o fluxo.
-- Simplificar para virar apenas tela de agradecimento/cupom, ou remover a dependência dela no processo de conclusão.
+**2. Atualizar o insert no FeedbackSurvey.tsx**
+- Gravar `survey_path` com o histórico completo
+- Gravar `survey_answers` com as respostas de texto + texto do end state
+- Gravar `end_state` com o step final
+- Manter `segment` e `churn_status` corretamente
+- Remover valores placeholder dos campos antigos — usar strings vazias ou null
+- Continuar gravando `customer_name` e `phone` como já faz
 
-5. Melhorar rastreabilidade
-- Salvar no `localStorage` um status como “submitted” com timestamp/id local para indicar que a avaliação foi concluída.
-- Isso ajuda a distinguir “respondi tudo” de “realmente foi salvo”.
+**3. Manter compatibilidade com o Admin dashboard**
+- Atualizar `src/pages/Admin.tsx` para exibir as novas colunas (`end_state`, `survey_answers`) em vez dos campos antigos que estão vazios
+- Mostrar o caminho percorrido e as respostas de texto de forma legível
 
-Arquivos a ajustar
-- `src/components/feedback/FeedbackSurvey.tsx`
-- `src/pages/Results.tsx`
+### Arquivos a modificar
+- **Migração SQL**: adicionar 3 colunas (`survey_path`, `survey_answers`, `end_state`)
+- **`src/components/feedback/FeedbackSurvey.tsx`**: atualizar o insert (linhas 652-666)
+- **`src/pages/Admin.tsx`**: exibir os novos campos corretamente
 
-Validação após implementar
-- Fluxo completo respondendo até o fim e confirmando novo registro no banco
-- Fluxo completo clicando em “Pular” no telefone
-- Fluxo com telefone preenchido
-- Garantir que não cria registro duplicado ao avançar para cupom/loja
+### Resultado esperado
+Cada resposta vai registrar: nome, segmento, churn status, caminho completo de sim/não, respostas de texto, e o estado final — tudo consultável e exportável.
 
-Detalhe técnico
-- O banco está conectado e atualmente há 5 registros salvos; o último é de `2026-04-01 19:55:24+00`.
-- O principal problema não parece ser conexão, e sim desenho do fluxo de conclusão + tratamento incompleto do retorno do insert.
-
-Diagrama resumido
-```text
-Hoje:
-perguntas -> tela final -> telefone/cupom -> botão final -> salvar
-
-Proposto:
-perguntas -> salvar imediatamente -> telefone/cupom opcional -> loja/agradecimento
-```
