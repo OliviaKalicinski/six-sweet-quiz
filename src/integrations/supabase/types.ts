@@ -19,6 +19,7 @@ export type Database = {
           churn_status: string | null
           created_at: string
           customer_name: string
+          end_state: string | null
           expectations: string
           expectations_reason: string | null
           id: string
@@ -34,6 +35,8 @@ export type Database = {
           phone: string | null
           rejection_action: string | null
           segment: string | null
+          survey_answers: Json | null
+          survey_path: string[] | null
           survey_version: string | null
           usage_time: string
           would_change: string
@@ -43,6 +46,7 @@ export type Database = {
           churn_status?: string | null
           created_at?: string
           customer_name?: string
+          end_state?: string | null
           expectations: string
           expectations_reason?: string | null
           id?: string
@@ -58,6 +62,8 @@ export type Database = {
           phone?: string | null
           rejection_action?: string | null
           segment?: string | null
+          survey_answers?: Json | null
+          survey_path?: string[] | null
           survey_version?: string | null
           usage_time: string
           would_change: string
@@ -67,6 +73,7 @@ export type Database = {
           churn_status?: string | null
           created_at?: string
           customer_name?: string
+          end_state?: string | null
           expectations?: string
           expectations_reason?: string | null
           id?: string
@@ -82,6 +89,8 @@ export type Database = {
           phone?: string | null
           rejection_action?: string | null
           segment?: string | null
+          survey_answers?: Json | null
+          survey_path?: string[] | null
           survey_version?: string | null
           usage_time?: string
           would_change?: string

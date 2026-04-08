@@ -11,6 +11,7 @@ import { ptBR } from "date-fns/locale";
 interface FeedbackResponse {
   id: string;
   created_at: string;
+  customer_name: string;
   pet_type: string;
   pet_type_other: string | null;
   usage_time: string;
@@ -26,6 +27,13 @@ interface FeedbackResponse {
   would_repurchase: string;
   no_repurchase_reason: string | null;
   ideal_product: string | null;
+  segment: string | null;
+  churn_status: string | null;
+  survey_version: string | null;
+  phone: string | null;
+  survey_path: string[] | null;
+  survey_answers: Record<string, unknown> | null;
+  end_state: string | null;
 }
 
 const petTypeLabels: Record<string, string> = {
@@ -77,8 +85,9 @@ const Admin = () => {
 
       if (error) throw error;
 
-      setResponses(data || []);
-      calculateStats(data || []);
+      const typed = (data || []) as unknown as FeedbackResponse[];
+      setResponses(typed);
+      calculateStats(typed);
     } catch (error) {
       console.error("Error fetching responses:", error);
       toast({
@@ -112,37 +121,31 @@ const Admin = () => {
 
     const headers = [
       "Data",
-      "Tipo de Pet",
-      "Tempo de Uso",
-      "NPS",
-      "Expectativas",
-      "Razão Expectativas",
-      "Motivações",
-      "O que mais gostou",
-      "O que mudaria",
-      "Aceitação do Pet",
-      "Compraria novamente",
-      "Produto ideal",
+      "Nome",
+      "Segmento",
+      "Churn Status",
+      "Versão",
+      "End State",
+      "Telefone",
+      "Caminho",
+      "Respostas",
     ];
 
     const rows = responses.map((r) => [
       format(new Date(r.created_at), "dd/MM/yyyy HH:mm"),
-      petTypeLabels[r.pet_type] || r.pet_type_other || r.pet_type,
-      usageTimeLabels[r.usage_time] || r.usage_time,
-      r.nps_score,
-      r.expectations,
-      r.expectations_reason || "",
-      r.motivations.join(", "),
-      r.liked_most,
-      r.would_change,
-      r.pet_acceptance,
-      r.would_repurchase,
-      r.ideal_product || "",
+      r.customer_name || "",
+      r.segment || "",
+      r.churn_status || "",
+      r.survey_version || "",
+      r.end_state || "",
+      r.phone || "",
+      r.survey_path ? r.survey_path.join(" → ") : "",
+      r.survey_answers ? JSON.stringify(r.survey_answers) : r.liked_most || "",
     ]);
 
     const csvContent = [
       headers.join(";"),
-      ...rows.map((row) => row.map((cell) => `"${cell}"`).join(";")),
+      ...rows.map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(";")),
     ].join("\n");
 
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
@@ -188,18 +191,20 @@ const Admin = () => {
             <p className="text-3xl font-bold text-foreground">{stats.total}</p>
           </Card>
           <Card className="p-4 bg-card border-2 border-border">
-            <p className="text-sm text-muted-foreground font-special">Média NPS</p>
-            <p className="text-3xl font-bold text-foreground">{stats.avgNps.toFixed(1)}</p>
+            <p className="text-sm text-muted-foreground font-special">Total de Respostas</p>
+            <p className="text-3xl font-bold text-foreground">{stats.total}</p>
           </Card>
           <Card className="p-4 bg-card border-2 border-border">
-            <p className="text-sm text-muted-foreground font-special">NPS Score</p>
-            <p className={`text-3xl font-bold ${npsScore >= 50 ? "text-green-600" : npsScore >= 0 ? "text-yellow-600" : "text-red-600"}`}>
-              {npsScore}%
+            <p className="text-sm text-muted-foreground font-special">v4 (novo formato)</p>
+            <p className="text-3xl font-bold text-foreground">
+              {responses.filter(r => r.survey_version === "v4").length}
             </p>
           </Card>
           <Card className="p-4 bg-card border-2 border-border">
-            <p className="text-sm text-muted-foreground font-special">Promotores</p>
-            <p className="text-3xl font-bold text-foreground">{stats.promoters}</p>
+            <p className="text-sm text-muted-foreground font-special">Com telefone</p>
+            <p className="text-3xl font-bold text-foreground">
+              {responses.filter(r => r.phone && r.phone.trim()).length}
+            </p>
           </Card>
         </div>
 
@@ -234,43 +239,68 @@ const Admin = () => {
               <Card key={response.id} className="p-6 bg-card border-2 border-border">
                 <div className="flex justify-between items-start mb-4">
                   <div>
+                    <p className="font-semibold text-foreground">{response.customer_name || "Anônimo"}</p>
                     <span className="text-sm text-muted-foreground font-special">
                       {format(new Date(response.created_at), "dd 'de' MMMM 'às' HH:mm", { locale: ptBR })}
                     </span>
-                    <div className="flex gap-2 mt-1">
-                      <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full font-special">
-                        {petTypeLabels[response.pet_type] || response.pet_type_other || response.pet_type}
-                      </span>
-                      <span className="px-2 py-1 bg-secondary/10 text-secondary text-xs rounded-full font-special">
-                        {usageTimeLabels[response.usage_time] || response.usage_time}
-                      </span>
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      {response.segment && (
+                        <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full font-special">
+                          {response.segment}
+                        </span>
+                      )}
+                      {response.churn_status && (
+                        <span className="px-2 py-1 bg-secondary/10 text-secondary text-xs rounded-full font-special">
+                          {response.churn_status}
+                        </span>
+                      )}
+                      {response.end_state && (
+                        <span className="px-2 py-1 bg-accent/20 text-accent-foreground text-xs rounded-full font-special">
+                          {response.end_state}
+                        </span>
+                      )}
+                      {response.survey_version && (
+                        <span className="px-2 py-1 bg-muted text-muted-foreground text-xs rounded-full font-special">
+                          {response.survey_version}
+                        </span>
+                      )}
                     </div>
                   </div>
-                  <div className={`text-2xl font-bold px-4 py-2 rounded-full ${
-                    response.nps_score >= 9 ? "bg-green-100 text-green-700" :
-                    response.nps_score >= 7 ? "bg-yellow-100 text-yellow-700" :
-                    "bg-red-100 text-red-700"
-                  }`}>
-                    {response.nps_score}
-                  </div>
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-4 text-sm font-special">
-                  <div>
-                    <p className="font-semibold text-foreground mb-1">O que mais gostou:</p>
-                    <p className="text-muted-foreground">{response.liked_most}</p>
-                  </div>
-                  <div>
-                    <p className="font-semibold text-foreground mb-1">O que mudaria:</p>
-                    <p className="text-muted-foreground">{response.would_change}</p>
-                  </div>
-                  {response.ideal_product && (
-                    <div className="md:col-span-2">
-                      <p className="font-semibold text-foreground mb-1">Produto ideal sugerido:</p>
-                      <p className="text-muted-foreground">{response.ideal_product}</p>
-                    </div>
+                  {response.phone && (
+                    <span className="text-sm text-muted-foreground font-special">📞 {response.phone}</span>
                   )}
                 </div>
+
+                {/* Survey answers (v4) */}
+                {response.survey_answers && Object.keys(response.survey_answers).length > 0 && (
+                  <div className="space-y-2 text-sm font-special mb-3">
+                    {Object.entries(response.survey_answers).map(([key, value]) => (
+                      value && String(value).trim() ? (
+                        <div key={key}>
+                          <p className="font-semibold text-foreground mb-0.5">{key}:</p>
+                          <p className="text-muted-foreground">{String(value)}</p>
+                        </div>
+                      ) : null
+                    ))}
+                  </div>
+                )}
+
+                {/* Legacy fields for old responses */}
+                {(!response.survey_answers || Object.keys(response.survey_answers).length === 0) && response.liked_most && (
+                  <div className="space-y-2 text-sm font-special mb-3">
+                    <div>
+                      <p className="font-semibold text-foreground mb-0.5">Dados (legado):</p>
+                      <p className="text-muted-foreground whitespace-pre-wrap break-words">{response.liked_most}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Path taken */}
+                {response.survey_path && response.survey_path.length > 0 && (
+                  <div className="text-xs text-muted-foreground font-special mt-2 pt-2 border-t border-border">
+                    Caminho: {response.survey_path.join(" → ")}
+                  </div>
+                )}
               </Card>
             ))}
           </div>

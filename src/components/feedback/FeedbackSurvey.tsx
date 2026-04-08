@@ -649,20 +649,30 @@ export const FeedbackSurvey = () => {
 
     const doSave = async () => {
       try {
+        const surveyPath = [...history, currentId];
+        const surveyAnswersData = {
+          ...textAnswers,
+          end_text: endTextField || "",
+        };
+
         const { error } = await supabase.from("feedback_responses").insert({
           customer_name:        customerName,
           phone:                phone || null,
           pet_type:             segment,
           usage_time:           churn,
+          segment:              segment,
+          churn_status:         churn,
           nps_score:            0,
-          expectations:         "survey_v3",
+          expectations:         "",
           motivations:          [],
-          liked_most:           JSON.stringify(textAnswers),
-          would_change:         endTextField || "",
-          pet_acceptance:       "survey_v3",
-          would_repurchase:     "survey_v3",
-          no_repurchase_reason: null,
-          ideal_product:        null,
+          liked_most:           "",
+          would_change:         "",
+          pet_acceptance:       "",
+          would_repurchase:     "",
+          survey_version:       "v4",
+          survey_path:          surveyPath,
+          survey_answers:       surveyAnswersData,
+          end_state:            currentId,
         });
         if (error) {
           console.error("Supabase insert error:", error);
