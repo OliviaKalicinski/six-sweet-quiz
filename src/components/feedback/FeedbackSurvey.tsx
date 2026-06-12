@@ -91,7 +91,7 @@ const STEPS: Record<string, Step> = {
     end: {
       headline:        "O DRAGÃO AGRADECE",
       message:         "Sua resposta guia os próximos passos da revolução — e o Dragão não esquece quem tá junto.",
-      couponCode:      "DRAGAODENOVO",
+      couponCode:      "VOLTEI",
       discountLabel:   "10% OFF NO PRÓXIMO PEDIDO",
       hasTextField:    true,
       textPlaceholder: "Quer deixar um recado pro Dragão? (opcional)",
@@ -130,7 +130,7 @@ const STEPS: Record<string, Step> = {
     end: {
       headline:      "10% PRA FECHAR AGORA",
       message:       "O Dragão entende. Aqui vai 10% pra tirar o peso e finalizar.",
-      couponCode:    "VOLTADRAGAO",
+      couponCode:    "VOLTEI",
       discountLabel: "10% OFF",
       ctaLabel:      "FINALIZAR COM 10%",
       ctaUrl:        LOJA_URL,
@@ -153,7 +153,7 @@ const STEPS: Record<string, Step> = {
     end: {
       headline:      "O DRAGÃO TE LEVA DE VOLTA",
       message:       "Acontece. 10% de desconto só por voltar e fechar agora.",
-      couponCode:    "VOLTADRAGAO",
+      couponCode:    "VOLTEI",
       discountLabel: "10% OFF",
       ctaLabel:      "VOLTAR PRA LOJA",
       ctaUrl:        LOJA_URL,
