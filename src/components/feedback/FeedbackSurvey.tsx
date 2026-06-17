@@ -5,7 +5,7 @@ import { ProgressBar } from "@/components/ProgressBar";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import logo from "@/assets/logo.png";
-import { captureEntryUtms, buildCheckoutUrl } from "@/lib/utm";
+import { captureEntryUtms, buildCheckoutUrl, getEntryUtms, getEntryParam } from "@/lib/utm";
 
 const LOJA_URL     = "https://www.comidadedragao.com.br/collections/produtos";
 const WHATSAPP_URL = "https://wa.me/552139500576";
@@ -259,6 +259,8 @@ export const FeedbackSurvey = () => {
           ab_reason: choices["ab_q1"] || null,
           gate:      choices["gate"] || null,
           end_text:  endText || "",
+          utms:      getEntryUtms(),
+          contact_id: getEntryParam("cid"),
           ...texts,
         };
         const generatedId = crypto.randomUUID();
@@ -303,7 +305,7 @@ export const FeedbackSurvey = () => {
   const handleCtaClick = (url: string) => {
     if (endText.trim() && savedIdRef.current) {
       supabase.from("feedback_responses")
-        .update({ survey_answers: { flow: flowKey, nps, reaction: choices["buyer_reaction"] || null, pesou: choices["buyer_pesou"] || null, ab_reason: choices["ab_q1"] || null, end_text: endText, ...texts } })
+        .update({ survey_answers: { flow: flowKey, nps, reaction: choices["buyer_reaction"] || null, pesou: choices["buyer_pesou"] || null, ab_reason: choices["ab_q1"] || null, gate: choices["gate"] || null, end_text: endText, utms: getEntryUtms(), contact_id: getEntryParam("cid"), ...texts } })
         .eq("id", savedIdRef.current)
         .then(({ error }) => { if (error) console.error("End text update error:", error); });
     }

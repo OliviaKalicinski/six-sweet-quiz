@@ -66,3 +66,13 @@ export function buildCheckoutUrl(baseUrl: string, fallback: Utms, ctaPos?: strin
   if (ctaPos) url.searchParams.set("cta_pos", ctaPos);
   return url.href;
 }
+
+/** Retorna a UTM de entrada (first-touch) ou a da URL atual. */
+export function getEntryUtms(): Utms {
+  return readStored() ?? readUrlUtms();
+}
+
+/** Lê um parâmetro de entrada da URL (ex.: cid = id do contato no Reportana). */
+export function getEntryParam(key: string): string | null {
+  try { return new URLSearchParams(window.location.search).get(key); } catch { return null; }
+}
