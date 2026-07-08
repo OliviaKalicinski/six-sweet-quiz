@@ -1,0 +1,61 @@
+/* Blog do Dragão — design system (.bd) portado do tema Shopify (blog-redesign.css)
+   + classes .sv-* do survey no mesmo idioma. Escopo: tudo sob .bd */
+.bd{
+  --bd-bg:#FFFFFF; --bd-bg-soft:#F7F6F2;
+  --bd-ink:#0A0A0A; --bd-ink-2:rgba(10,10,10,.62); --bd-ink-3:rgba(10,10,10,.40);
+  --bd-rule:rgba(10,10,10,.14);
+  --bd-lime:#7BFF00;
+  --bd-display:'Big Shoulders Display',sans-serif;
+  --bd-sans:'Space Grotesk',system-ui,sans-serif;
+  --bd-mono:'Space Mono',ui-monospace,monospace;
+  --bd-bw:2px;
+  background:var(--bd-bg);color:var(--bd-ink);font-family:var(--bd-sans);line-height:1.55;-webkit-font-smoothing:antialiased;
+}
+.bd, .bd *{box-sizing:border-box}
+.bd.sv-screen{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 16px;position:relative;overflow:hidden}
+.bd.sv-screen::before{content:'';position:absolute;inset:0;pointer-events:none;z-index:0;background-image:radial-gradient(circle,rgba(10,10,10,.045) 1px,transparent 1.2px);background-size:18px 18px;mix-blend-mode:multiply}
+.sv-wrap{width:100%;max-width:440px;position:relative;z-index:1}
+.bd-win{position:relative;background:var(--bd-bg);border:var(--bd-bw) solid var(--bd-ink)}
+.bd-win-bar{display:flex;align-items:center;gap:8px;padding:6px 8px;border-bottom:var(--bd-bw) solid var(--bd-ink);background:var(--bd-bg)}
+.bd-btns{display:flex;gap:7px;background:var(--bd-bg);border:1.5px solid var(--bd-ink);padding:3px 8px;font-family:var(--bd-mono);font-size:12px;line-height:1}
+.bd-title{background:var(--bd-bg);border:1.5px solid var(--bd-ink);padding:3px 10px;font-family:var(--bd-mono);font-size:11px;text-transform:uppercase;letter-spacing:.08em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60%}
+.bd-grow{flex:1}
+.bd-win-body{padding:20px}
+.sv-brand{height:32px;width:auto;display:block;margin-bottom:16px}
+.sv-voice{font-family:var(--bd-mono);font-size:11px;letter-spacing:.03em;color:var(--bd-ink-2);margin-bottom:8px}
+.sv-prog{font-family:var(--bd-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--bd-ink-2);margin:2px 0 14px}
+.sv-prog b{color:var(--bd-ink)}
+.sv-back{border:0;background:transparent;cursor:pointer;font-family:var(--bd-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--bd-ink-2);padding:0;margin-bottom:8px}
+.sv-back:hover{color:var(--bd-ink)}
+.sv-q{font-family:var(--bd-display);font-weight:900;font-size:26px;line-height:1.0;text-transform:uppercase;margin-bottom:16px}
+.sv-q-xl{font-size:34px}
+.sv-hl{box-shadow:inset 0 -.14em 0 var(--bd-lime)}
+.sv-msg{font-size:14.5px;line-height:1.55;margin-bottom:16px}
+.sv-msg b{font-weight:700}
+.sv-field{margin-bottom:16px}
+.sv-flabel{display:block;font-family:var(--bd-mono);font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--bd-ink-2);margin-bottom:6px}
+.sv-input{width:100%;border:0;border-bottom:2px solid var(--bd-ink);background:transparent;outline:none;font-family:var(--bd-sans);font-size:18px;color:var(--bd-ink);padding:6px 0}
+.sv-input::placeholder{color:var(--bd-ink-3)}
+.sv-opts{display:flex;flex-direction:column;gap:10px}
+.sv-opt{width:100%;text-align:left;border:var(--bd-bw) solid var(--bd-ink);background:var(--bd-bg);font-family:var(--bd-sans);font-weight:600;font-size:15px;color:var(--bd-ink);padding:13px 14px;cursor:pointer;transition:transform .1s,box-shadow .12s}
+.sv-opt:hover{transform:translate(-2px,-2px);box-shadow:5px 5px 0 var(--bd-ink)}
+.sv-opt.sel{box-shadow:inset 0 -5px 0 var(--bd-lime)}
+.sv-nps{display:grid;grid-template-columns:repeat(11,1fr);gap:5px;margin:4px 0}
+.sv-npscell{border:1.5px solid var(--bd-ink);background:var(--bd-bg);font-family:var(--bd-mono);font-size:13px;color:var(--bd-ink);text-align:center;padding:9px 0;cursor:pointer;transition:background .1s,color .1s}
+.sv-npscell:hover{background:var(--bd-bg-soft)}
+.sv-npscell.sel{background:var(--bd-ink);color:#fff}
+.sv-npslbl{display:flex;justify-content:space-between;font-family:var(--bd-mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--bd-ink-3);margin-top:6px}
+.sv-ta{width:100%;min-height:80px;border:1.5px solid var(--bd-ink);background:var(--bd-bg);font-family:var(--bd-mono);font-size:12px;color:var(--bd-ink);padding:10px;margin:2px 0 14px;resize:none;outline:none}
+.sv-ta::placeholder{color:var(--bd-ink-3)}
+.sv-tip{font-family:var(--bd-mono);font-size:11px;line-height:1.5;color:var(--bd-ink-2);border-left:2px solid var(--bd-lime);padding-left:10px;margin-bottom:16px}
+.sv-coupon{border:var(--bd-bw) dashed var(--bd-ink);padding:12px;text-align:center;margin-bottom:14px}
+.sv-coupon .l{font-family:var(--bd-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--bd-ink-2)}
+.sv-coupon .c{font-family:var(--bd-display);font-weight:900;font-size:26px;letter-spacing:.12em;margin-top:2px}
+.bd-btn{display:flex;width:100%;align-items:center;justify-content:center;gap:8px;border:1.5px solid var(--bd-ink);background:var(--bd-ink);color:#fff;font-family:var(--bd-sans);font-weight:700;font-size:15px;text-transform:uppercase;letter-spacing:.02em;padding:14px;cursor:pointer;transition:background .15s,color .15s}
+.bd-btn:hover{background:var(--bd-bg);color:var(--bd-ink)}
+.bd-btn:disabled{opacity:.3;cursor:not-allowed}
+.sv-help{text-align:center;font-family:var(--bd-mono);font-size:11px;color:var(--bd-ink-2);margin-top:14px}
+.sv-help a{color:var(--bd-ink);text-decoration:underline;text-underline-offset:2px}
+.sv-anim{animation:svfade .3s ease}
+@keyframes svfade{from{opacity:0}to{opacity:1}}
+@media(max-width:380px){ .bd-win-body{padding:16px} .sv-q{font-size:23px} .sv-q-xl{font-size:29px} .bd-btns{display:none} }

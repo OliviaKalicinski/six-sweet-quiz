@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import logo from "@/assets/logo.png";
 import { captureEntryUtms, buildCheckoutUrl, getEntryUtms, getEntryParam } from "@/lib/utm";
+import "./blog-style.css";
 
 const LOJA_URL     = "https://www.comidadedragao.com.br/collections/produtos";
 const WHATSAPP_URL = "https://wa.me/552139500576";
@@ -329,47 +330,38 @@ export const FeedbackSurvey = () => {
   // ── WELCOME ──────────────────────────────────────────────────────────────
   if (!started) {
     return (
-      <div className="grain min-h-screen bg-background flex flex-col items-center justify-center p-6">
-        <div className="w-full max-w-md animate-in fade-in duration-500">
-          <div className="flex justify-center mb-6">
-            <img src={logo} alt="Comida de Dragão" className="w-32 md:w-40 h-auto" />
-          </div>
-
-          <p className="text-xs font-special text-muted-foreground italic mb-3 tracking-wide">"O Dragão quer trocar uma ideia rápida com você."</p>
-
-          <h1 className="text-4xl md:text-5xl font-black uppercase leading-none text-foreground mb-3" style={{ fontFamily: HEAD_FONT, letterSpacing: "-0.02em" }}>
-            {displayName ? `${displayName}, ` : ""}<span className="text-primary">RESPONDE O DRAGÃO.</span>
-          </h1>
-
-          <p className="text-sm font-special text-muted-foreground mb-6 leading-relaxed">
-            Pesquisa rapidíssima da Comida de Dragão. São poucas perguntas e, no fim, um <span className="text-primary font-semibold">cupom é seu</span>.
-          </p>
-
-          <div className="w-full h-px bg-border mb-6" />
-
-          {!name && (
-            <div className="mb-6">
-              <label className="block text-xs uppercase tracking-widest text-muted-foreground mb-2" style={{ fontFamily: HEAD_FONT }}>Seu nome</label>
-              <input
-                type="text"
-                value={customerName}
-                onChange={(e) => setCustomerName(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleStart()}
-                placeholder="Digite aqui..."
-                className="w-full bg-transparent border-b-2 border-foreground/30 focus:border-primary outline-none text-foreground text-xl py-2 font-special transition-colors placeholder:text-muted-foreground"
-                autoFocus
-              />
+      <div className="bd sv-screen">
+        <div className="sv-wrap">
+          <div className="bd-win">
+            <div className="bd-win-bar">
+              <span className="bd-btns">× − ▢</span>
+              <span className="bd-grow" />
+              <span className="bd-title">survey_do_dragão</span>
             </div>
-          )}
-
-          <button
-            onClick={handleStart}
-            disabled={!customerName.trim()}
-            className="w-full py-4 bg-primary text-primary-foreground text-2xl font-black uppercase tracking-wider hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-            style={{ fontFamily: HEAD_FONT }}
-          >
-            BORA →
-          </button>
+            <div className="bd-win-body">
+              <img src={logo} alt="Comida de Dragão" className="sv-brand" />
+              <p className="sv-voice">// o Dragão quer trocar uma ideia rápida com você</p>
+              <h1 className="sv-q sv-q-xl">
+                {displayName ? `${displayName}, ` : ""}<span className="sv-hl">responde o Dragão.</span>
+              </h1>
+              <p className="sv-msg">Pesquisa rapidíssima. Poucas perguntas e, no fim, um <b>cupom é seu</b>.</p>
+              {!name && (
+                <div className="sv-field">
+                  <label className="sv-flabel">Seu nome</label>
+                  <input
+                    type="text"
+                    value={customerName}
+                    onChange={(e) => setCustomerName(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleStart()}
+                    placeholder="digite aqui…"
+                    className="sv-input"
+                    autoFocus
+                  />
+                </div>
+              )}
+              <button onClick={handleStart} disabled={!customerName.trim()} className="bd-btn">Bora →</button>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -379,54 +371,39 @@ export const FeedbackSurvey = () => {
   if (step?.type === "end") {
     const cfg = step.end;
     return (
-      <div className="grain min-h-screen bg-background flex flex-col items-center justify-center p-6">
-        <div className="w-full max-w-md animate-in fade-in duration-700">
-          <div className="flex justify-center mb-5">
-            <img src={logo} alt="Comida de Dragão" className="w-28 md:w-36 h-auto" />
+      <div className="bd sv-screen">
+        <div className="sv-wrap">
+          <div className="bd-win">
+            <div className="bd-win-bar">
+              <span className="bd-btns">× − ▢</span>
+              <span className="bd-grow" />
+              <span className="bd-title">resposta.txt</span>
+            </div>
+            <div className="bd-win-body">
+              <h1 className="sv-q">{cfg.headline}</h1>
+              <p className="sv-msg">{cfg.message}</p>
+              {cfg.tip && <div className="sv-tip">{cfg.tip}</div>}
+              {cfg.couponCode && (
+                <div className="sv-coupon">
+                  <div className="l">seu cupom — {cfg.discountLabel}</div>
+                  <div className="c">{cfg.couponCode}</div>
+                  <div className="l" style={{ marginTop: "4px" }}>um uso por cliente · válido no site</div>
+                </div>
+              )}
+              {cfg.hasTextField && (
+                <textarea
+                  value={endText}
+                  onChange={(e) => setEndText(e.target.value)}
+                  onBlur={persistEndText}
+                  placeholder={cfg.textPlaceholder}
+                  className="sv-ta"
+                  maxLength={300}
+                />
+              )}
+              <button onClick={() => handleCtaClick(cfg.ctaUrl)} className="bd-btn">{cfg.ctaLabel} →</button>
+              <p className="sv-help">Precisou de ajuda? <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">(21) 3950-0576</a></p>
+            </div>
           </div>
-
-          <h1 className="text-3xl md:text-4xl font-black uppercase text-foreground leading-tight mb-3" style={{ fontFamily: HEAD_FONT }}>
-            {displayName ? <>{displayName},<br /><span className="text-primary">{cfg.headline}</span></> : <span className="text-primary">{cfg.headline}</span>}
-          </h1>
-
-          <p className="text-sm md:text-base font-special text-muted-foreground mb-4 leading-relaxed">{cfg.message}</p>
-
-          {cfg.tip && (
-            <div className="border border-primary/40 p-3 mb-4">
-              <p className="text-sm font-special text-foreground leading-relaxed"><span className="text-primary font-bold">// </span>{cfg.tip}</p>
-            </div>
-          )}
-
-          {cfg.couponCode && (
-            <div className="border-2 border-primary p-4 mb-4 text-center">
-              <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2" style={{ fontFamily: HEAD_FONT }}>SEU CUPOM — {cfg.discountLabel}</p>
-              <div className="text-3xl md:text-4xl font-black text-primary tracking-widest" style={{ fontFamily: HEAD_FONT }}>{cfg.couponCode}</div>
-              <p className="text-xs text-muted-foreground mt-2 font-special">Um uso por cliente · válido no site</p>
-            </div>
-          )}
-
-          {cfg.hasTextField && (
-            <Textarea
-              value={endText}
-              onChange={(e) => setEndText(e.target.value)}
-              onBlur={persistEndText}
-              placeholder={cfg.textPlaceholder}
-              className="bg-transparent border border-border text-foreground font-special text-sm rounded-none mb-4 min-h-[80px] resize-none focus:border-primary"
-              maxLength={300}
-            />
-          )}
-
-          <button
-            onClick={() => handleCtaClick(cfg.ctaUrl)}
-            className="w-full py-4 bg-primary text-primary-foreground font-black uppercase tracking-wider text-lg md:text-xl hover:opacity-90 active:scale-[0.98] transition-all"
-            style={{ fontFamily: HEAD_FONT }}
-          >
-            {cfg.ctaLabel} →
-          </button>
-
-          <p className="text-center text-xs font-special text-muted-foreground mt-4">
-            Precisou de ajuda? <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">(21) 3950-0576</a>
-          </p>
         </div>
       </div>
     );
@@ -436,69 +413,63 @@ export const FeedbackSurvey = () => {
 
   // ── QUESTION (choice / nps / text) ──────────────────────────────────────────
   return (
-    <div className="grain min-h-screen bg-background flex flex-col items-center justify-center p-6">
-      <div className="w-full max-w-md">
-        <ProgressBar current={progressCurrent} total={progressTotal} />
+    <div className="bd sv-screen">
+      <div className="sv-wrap">
+        <div className="bd-win">
+          <div className="bd-win-bar">
+            <span className="bd-btns">× − ▢</span>
+            <span className="bd-grow" />
+            <span className="bd-title">survey_do_dragão</span>
+          </div>
+          <div className="bd-win-body">
+            <button onClick={handleBack} className="sv-back">← voltar</button>
+            <div className="sv-prog">// pergunta <b>{progressCurrent}</b> de {progressTotal}</div>
+            <div key={currentId} className="sv-anim">
+              <p className="sv-voice">{step.voice}</p>
+              <h2 className="sv-q">{step.question}</h2>
 
-        <button onClick={handleBack} className="mt-4 mb-6 text-xs uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors" style={{ fontFamily: HEAD_FONT }}>← VOLTAR</button>
+              {step.type === "choice" && (
+                <div className="sv-opts">
+                  {step.options.map((opt) => (
+                    <button key={opt.value} onClick={() => handleChoice(opt.value, opt.next)} className="sv-opt">
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              )}
 
-        <div className="animate-in fade-in duration-300" key={currentId}>
-          <p className="text-xs font-special text-muted-foreground italic mb-3 leading-relaxed">"{step.voice}"</p>
+              {step.type === "nps" && (
+                <div>
+                  <div className="sv-nps">
+                    {Array.from({ length: 11 }, (_, i) => (
+                      <button
+                        key={i}
+                        onClick={() => handleNps(i, step.next)}
+                        className={`sv-npscell${npsSelected === i ? " sel" : ""}`}
+                      >
+                        {i}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="sv-npslbl"><span>0 · não indicaria</span><span>indicaria · 10</span></div>
+                </div>
+              )}
 
-          <h2 className="text-2xl md:text-3xl font-black text-foreground uppercase leading-tight mb-5" style={{ fontFamily: HEAD_FONT, letterSpacing: "-0.01em" }}>{step.question}</h2>
-
-          {step.type === "choice" && (
-            <div className="space-y-2.5">
-              {step.options.map((opt) => (
-                <button
-                  key={opt.value}
-                  onClick={() => handleChoice(opt.value, opt.next)}
-                  className="w-full text-left px-4 py-3.5 border-2 border-foreground/30 text-foreground hover:border-primary hover:bg-primary/5 active:scale-[0.99] transition-all"
-                >
-                  <span className="text-base font-special font-medium">{opt.label}</span>
-                </button>
-              ))}
+              {step.type === "text" && (
+                <div>
+                  <textarea
+                    value={texts[currentId] || ""}
+                    onChange={(e) => setTexts((p) => ({ ...p, [currentId]: e.target.value }))}
+                    placeholder={step.placeholder}
+                    className="sv-ta"
+                    maxLength={300}
+                    autoFocus
+                  />
+                  <button onClick={() => goTo(step.next)} className="bd-btn">Continuar →</button>
+                </div>
+              )}
             </div>
-          )}
-
-          {step.type === "nps" && (
-            <div className="space-y-3">
-              <div className="flex flex-wrap justify-center gap-2">
-                {Array.from({ length: 11 }, (_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => handleNps(i, step.next)}
-                    className={`w-11 h-11 border-2 font-black text-lg transition-all ${
-                      npsSelected === i
-                        ? "bg-primary text-primary-foreground border-primary scale-110"
-                        : "bg-transparent text-foreground border-foreground/30 hover:border-primary hover:scale-105"
-                    }`}
-                    style={{ fontFamily: HEAD_FONT }}
-                  >
-                    {i}
-                  </button>
-                ))}
-              </div>
-              <div className="flex justify-between text-xs text-muted-foreground font-special px-1">
-                <span>0 · não indicaria</span>
-                <span>indicaria · 10</span>
-              </div>
-            </div>
-          )}
-
-          {step.type === "text" && (
-            <div className="space-y-4">
-              <Textarea
-                value={texts[currentId] || ""}
-                onChange={(e) => setTexts((p) => ({ ...p, [currentId]: e.target.value }))}
-                placeholder={step.placeholder}
-                className="bg-transparent border border-border text-foreground font-special text-base rounded-none min-h-[110px] resize-none focus:border-primary placeholder:text-muted-foreground"
-                maxLength={300}
-                autoFocus
-              />
-              <button onClick={() => goTo(step.next)} className="w-full py-4 bg-primary text-primary-foreground font-black uppercase tracking-wider text-xl hover:opacity-90 active:scale-[0.98] transition-all" style={{ fontFamily: HEAD_FONT }}>CONTINUAR →</button>
-            </div>
-          )}
+          </div>
         </div>
       </div>
     </div>
