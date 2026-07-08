@@ -81,6 +81,8 @@ const STEPS: Record<string, Step> = {
       headline: "O SEGREDO DA ACEITAÇÃO",
       message:  "Antes de desistir: misture 20% da Comida de Dragão com 80% da ração por 5 dias. O olfato se acostuma e a aceitação dispara.",
       tip:      "Se mesmo assim recusar, o Dragão resolve com você no WhatsApp.",
+      hasTextField:    true,
+      textPlaceholder: "O que seu pet fez? (opcional)",
       ctaLabel: "FALAR COM O DRAGÃO",
       ctaUrl:   WHATSAPP_URL,
     },
@@ -120,6 +122,8 @@ const STEPS: Record<string, Step> = {
       message:       "Fechando acima de R$150, o frete é por conta do Dragão.",
       couponCode:    "FRETEDRAGAO",
       discountLabel: "FRETE GRÁTIS ACIMA DE R$150",
+      hasTextField:    true,
+      textPlaceholder: "O que deixaria o frete ok? (opcional)",
       ctaLabel:      "FINALIZAR MINHA COMPRA",
       ctaUrl:        LOJA_URL,
     },
@@ -132,6 +136,8 @@ const STEPS: Record<string, Step> = {
       message:       "O Dragão entende. Aqui vai 10% pra tirar o peso e finalizar.",
       couponCode:    "VOLTEI",
       discountLabel: "10% OFF",
+      hasTextField:    true,
+      textPlaceholder: "Qual preço faria sentido? (opcional)",
       ctaLabel:      "FINALIZAR COM 10%",
       ctaUrl:        LOJA_URL,
     },
@@ -143,6 +149,8 @@ const STEPS: Record<string, Step> = {
       headline: "O SEGREDO DA ACEITAÇÃO",
       message:  "Quase todo pet aceita assim: misture 20% da Comida de Dragão com 80% da ração por 5 dias. O olfato se acostuma e a aceitação dispara.",
       tip:      "Se mesmo assim recusar, chama o Dragão no WhatsApp.",
+      hasTextField:    true,
+      textPlaceholder: "Qual dúvida ficou? (opcional)",
       ctaLabel: "TIRAR DÚVIDA NO WHATSAPP",
       ctaUrl:   WHATSAPP_URL,
     },
@@ -155,6 +163,8 @@ const STEPS: Record<string, Step> = {
       message:       "Acontece. 10% de desconto só por voltar e fechar agora.",
       couponCode:    "VOLTEI",
       discountLabel: "10% OFF",
+      hasTextField:    true,
+      textPlaceholder: "Quer que a gente te lembre? (opcional)",
       ctaLabel:      "VOLTAR PRA LOJA",
       ctaUrl:        LOJA_URL,
     },
@@ -302,13 +312,16 @@ export const FeedbackSurvey = () => {
     doSave();
   }, [step?.type, saved]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const persistEndText = () => {
+    if (!endText.trim() || !savedIdRef.current) return;
+    supabase.from("feedback_responses")
+      .update({ survey_answers: { flow: flowKey, nps, reaction: choices["buyer_reaction"] || null, pesou: choices["buyer_pesou"] || null, ab_reason: choices["ab_q1"] || null, gate: choices["gate"] || null, end_text: endText, utms: getEntryUtms(), contact_id: getEntryParam("cid"), ...texts } })
+      .eq("id", savedIdRef.current)
+      .then(({ error }) => { if (error) console.error("End text persist error:", error); });
+  };
+
   const handleCtaClick = (url: string) => {
-    if (endText.trim() && savedIdRef.current) {
-      supabase.from("feedback_responses")
-        .update({ survey_answers: { flow: flowKey, nps, reaction: choices["buyer_reaction"] || null, pesou: choices["buyer_pesou"] || null, ab_reason: choices["ab_q1"] || null, gate: choices["gate"] || null, end_text: endText, utms: getEntryUtms(), contact_id: getEntryParam("cid"), ...texts } })
-        .eq("id", savedIdRef.current)
-        .then(({ error }) => { if (error) console.error("End text update error:", error); });
-    }
+    persistEndText();
     const finalUrl = url.startsWith("https://wa.me") ? url : buildCheckoutUrl(url, UTM_FALLBACK, currentId);
     window.open(finalUrl, "_blank");
   };
@@ -396,6 +409,7 @@ export const FeedbackSurvey = () => {
             <Textarea
               value={endText}
               onChange={(e) => setEndText(e.target.value)}
+              onBlur={persistEndText}
               placeholder={cfg.textPlaceholder}
               className="bg-transparent border border-border text-foreground font-special text-sm rounded-none mb-4 min-h-[80px] resize-none focus:border-primary"
               maxLength={300}
