@@ -83,7 +83,7 @@ const STEPS: Record<string, Step> = {
       message:  "Antes de desistir: misture 20% da Comida de Dragão com 80% da ração por 5 dias. O olfato se acostuma e a aceitação dispara.",
       tip:      "Se mesmo assim recusar, o Dragão resolve com você no WhatsApp.",
       hasTextField:    true,
-      textPlaceholder: "O que seu pet fez? (opcional)",
+      textPlaceholder: "Como foi a recusa? (cheirou e saiu, nem chegou perto, comeu e não quis mais…)",
       ctaLabel: "FALAR COM O DRAGÃO",
       ctaUrl:   WHATSAPP_URL,
     },
@@ -97,7 +97,7 @@ const STEPS: Record<string, Step> = {
       couponCode:      "VOLTEI",
       discountLabel:   "10% OFF NO PRÓXIMO PEDIDO",
       hasTextField:    true,
-      textPlaceholder: "Quer deixar um recado pro Dragão? (opcional)",
+      textPlaceholder: "O que seu pet fez na primeira vez que provou?",
       ctaLabel:        "VER LOJA",
       ctaUrl:          LOJA_URL,
     },
@@ -124,7 +124,7 @@ const STEPS: Record<string, Step> = {
       couponCode:    "FRETEDRAGAO",
       discountLabel: "FRETE GRÁTIS ACIMA DE R$150",
       hasTextField:    true,
-      textPlaceholder: "O que deixaria o frete ok? (opcional)",
+      textPlaceholder: "Quanto de frete você pagaria sem pensar duas vezes?",
       ctaLabel:      "FINALIZAR MINHA COMPRA",
       ctaUrl:        LOJA_URL,
     },
@@ -138,7 +138,7 @@ const STEPS: Record<string, Step> = {
       couponCode:    "VOLTEI",
       discountLabel: "10% OFF",
       hasTextField:    true,
-      textPlaceholder: "Qual preço faria sentido? (opcional)",
+      textPlaceholder: "Você comparou com outro petisco? Qual, e por quanto?",
       ctaLabel:      "FINALIZAR COM 10%",
       ctaUrl:        LOJA_URL,
     },
@@ -151,7 +151,7 @@ const STEPS: Record<string, Step> = {
       message:  "Quase todo pet aceita assim: misture 20% da Comida de Dragão com 80% da ração por 5 dias. O olfato se acostuma e a aceitação dispara.",
       tip:      "Se mesmo assim recusar, chama o Dragão no WhatsApp.",
       hasTextField:    true,
-      textPlaceholder: "Qual dúvida ficou? (opcional)",
+      textPlaceholder: "Qual foi a dúvida? Escreve aqui que o Dragão responde no WhatsApp.",
       ctaLabel: "TIRAR DÚVIDA NO WHATSAPP",
       ctaUrl:   WHATSAPP_URL,
     },
@@ -165,7 +165,7 @@ const STEPS: Record<string, Step> = {
       couponCode:    "VOLTEI",
       discountLabel: "10% OFF",
       hasTextField:    true,
-      textPlaceholder: "Quer que a gente te lembre? (opcional)",
+      textPlaceholder: "O que você tava fazendo quando parou?",
       ctaLabel:      "VOLTAR PRA LOJA",
       ctaUrl:        LOJA_URL,
     },
@@ -177,7 +177,7 @@ const STEPS: Record<string, Step> = {
       headline:        "CONTA PRO DRAGÃO",
       message:         "O Dragão lê tudo. Se for algo que a gente resolve na hora, é só chamar.",
       hasTextField:    true,
-      textPlaceholder: "O que te impediu de finalizar?",
+      textPlaceholder: "O que te impediu? Pode ser sincero, o Dragão aguenta.",
       ctaLabel:        "CHAMAR NO WHATSAPP",
       ctaUrl:          WHATSAPP_URL,
     },
@@ -383,13 +383,6 @@ export const FeedbackSurvey = () => {
               <h1 className="sv-q">{cfg.headline}</h1>
               <p className="sv-msg">{cfg.message}</p>
               {cfg.tip && <div className="sv-tip">{cfg.tip}</div>}
-              {cfg.couponCode && (
-                <div className="sv-coupon">
-                  <div className="l">seu cupom — {cfg.discountLabel}</div>
-                  <div className="c">{cfg.couponCode}</div>
-                  <div className="l" style={{ marginTop: "4px" }}>um uso por cliente · válido no site</div>
-                </div>
-              )}
               {cfg.hasTextField && (
                 <textarea
                   value={endText}
@@ -399,6 +392,13 @@ export const FeedbackSurvey = () => {
                   className="sv-ta"
                   maxLength={300}
                 />
+              )}
+              {cfg.couponCode && (
+                <div className="sv-coupon">
+                  <div className="l">seu cupom — {cfg.discountLabel}</div>
+                  <div className="c">{cfg.couponCode}</div>
+                  <div className="l" style={{ marginTop: "4px" }}>um uso por cliente · válido no site</div>
+                </div>
               )}
               <button onClick={() => handleCtaClick(cfg.ctaUrl)} className="bd-btn">{cfg.ctaLabel} →</button>
               <p className="sv-help">Precisou de ajuda? <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">(21) 3950-0576</a></p>
