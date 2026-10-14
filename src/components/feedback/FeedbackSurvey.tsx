@@ -2,7 +2,18 @@ import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Textarea } from "@/components/ui/textarea";
 import { ProgressBar } from "@/components/ProgressBar";
-import { supabase } from "@/integrations/supabase/client";
+// 14/10/2026: as respostas passam a morar no dash da Comida de Dragão (função survey-resposta), não mais no banco
+// do Lovable. O segredo de cada resposta fica só neste navegador e permite completar o texto final depois.
+const DASH_SURVEY_URL = "https://rbjvwdsfpalyypimfrkf.supabase.co/functions/v1/survey-resposta";
+async function gravarNoDash(corpo: Record<string, unknown>): Promise<void> {
+  const r = await fetch(DASH_SURVEY_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(corpo),
+    keepalive: true,
+  });
+  if (!r.ok) throw new Error(`dash respondeu ${r.status}`);
+}
 import { useToast } from "@/hooks/use-toast";
 import logo from "@/assets/logo.png";
 import { captureEntryUtms, buildCheckoutUrl, getEntryUtms, getEntryParam } from "@/lib/utm";
@@ -254,6 +265,7 @@ export const FeedbackSurvey = () => {
 
   const savingRef  = useRef(false);
   const savedIdRef = useRef<string | null>(null);
+  const segredoRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (step?.type !== "end" || saved || savingRef.current) return;
@@ -275,32 +287,37 @@ export const FeedbackSurvey = () => {
           ...texts,
         };
         const generatedId = crypto.randomUUID();
+        const segredo = crypto.randomUUID() + crypto.randomUUID();
         savedIdRef.current = generatedId;
+        segredoRef.current = segredo;
 
-        const { error } = await supabase.from("feedback_responses").insert({
-          id:               generatedId,
-          customer_name:    customerName,
-          phone:            null,
-          nps_score:        nps ?? 0,
-          pet_acceptance:   choices["buyer_reaction"] || "",
-          usage_time:       tried || "",
-          pet_type:         "",
-          expectations:     "",
-          motivations:      [],
-          liked_most:       choices["buyer_pesou"] || "",
-          would_change:     "",
-          would_repurchase: "",
-          survey_version:   "v5",
-          survey_path:      surveyPath,
-          survey_answers:   surveyAnswers,
-          end_state:        currentId,
-        });
+        let error: unknown = null;
+        try {
+          await gravarNoDash({
+            acao:            "gravar",
+            id:              generatedId,
+            segredo,
+            customer_name:   customerName,
+            contact_id:      getEntryParam("cid"),
+            nps_score:       nps ?? null,
+            pet_acceptance:  choices["buyer_reaction"] || "",
+            usage_time:      tried || "",
+            liked_most:      choices["buyer_pesou"] || "",
+            survey_version:  "v5",
+            survey_path:     surveyPath,
+            survey_answers:  surveyAnswers,
+            end_state:       currentId,
+          });
+        } catch (e) {
+          error = e;
+        }
 
         if (error) {
-          console.error("Supabase insert error:", error);
+          console.error("Erro ao gravar no dash:", error);
           toast({ title: "Erro ao salvar", description: "Tente novamente mais tarde.", variant: "destructive" });
           savingRef.current = false;
           savedIdRef.current = null;
+          segredoRef.current = null;
           return;
         }
         setSaved(true);
@@ -314,11 +331,9 @@ export const FeedbackSurvey = () => {
   }, [step?.type, saved]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const persistEndText = () => {
-    if (!endText.trim() || !savedIdRef.current) return;
-    supabase.from("feedback_responses")
-      .update({ survey_answers: { flow: flowKey, nps, reaction: choices["buyer_reaction"] || null, pesou: choices["buyer_pesou"] || null, ab_reason: choices["ab_q1"] || null, gate: choices["gate"] || null, end_text: endText, utms: getEntryUtms(), contact_id: getEntryParam("cid"), ...texts } })
-      .eq("id", savedIdRef.current)
-      .then(({ error }) => { if (error) console.error("End text persist error:", error); });
+    if (!endText.trim() || !savedIdRef.current || !segredoRef.current) return;
+    gravarNoDash({ acao: "texto_final", id: savedIdRef.current, segredo: segredoRef.current, end_text: endText })
+      .catch((error) => console.error("End text persist error:", error));
   };
 
   const handleCtaClick = (url: string) => {
